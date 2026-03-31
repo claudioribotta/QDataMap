@@ -1,0 +1,296 @@
+﻿NUTS0_CODE,NUTS0_NAME,NUTS2_CODE,NUTS2_NAME,NUTS_LEVEL,CROP_CODE,AREA_AV,PROD_AV,UAA_AV,PRC_UAA_AV,NUTS_AREA,PRC_NUTS_AV
+AT,Austria,AT,Austria,NUTS0,F2000,0,0,2642.21,0,8387.9,0
+AT,Austria,AT11,Burgenland (AT),NUTS2,F2000,0,0,0,,396.2,0
+AT,Austria,AT12,Niederösterreich,NUTS2,F2000,0,0,0,,1918.6,0
+AT,Austria,AT13,Wien,NUTS2,F2000,0,0,0,,41.5,0
+AT,Austria,AT21,Kärnten,NUTS2,F2000,0,0,0,,953.8,0
+AT,Austria,AT22,Steiermark,NUTS2,F2000,0,0,0,,1640.1,0
+AT,Austria,AT31,Oberösterreich,NUTS2,F2000,0,0,0,,1198,0
+AT,Austria,AT32,Salzburg,NUTS2,F2000,0,0,0,,715.6,0
+AT,Austria,AT33,Tirol,NUTS2,F2000,0,0,0,,1264,0
+AT,Austria,AT34,Vorarlberg,NUTS2,F2000,0,0,0,,260.1,0
+BE,Belgium,BE,Belgium,NUTS0,F2000,0,0,1355.86,0,3052.8,0
+BE,Belgium,BE10,Région de Bruxelles-Capitale/Brussels Hoofdstedelijk Gewest,NUTS2,F2000,0,0,0,,16.1,0
+BE,Belgium,BE21,Prov. Antwerpen,NUTS2,F2000,0,0,0,,286.7,0
+BE,Belgium,BE22,Prov. Limburg (BE),NUTS2,F2000,0,0,0,,242.2,0
+BE,Belgium,BE23,Prov. Oost-Vlaanderen,NUTS2,F2000,0,0,0,,298.2,0
+BE,Belgium,BE24,Prov. Vlaams-Brabant,NUTS2,F2000,0,0,0,,210.6,0
+BE,Belgium,BE25,Prov. West-Vlaanderen,NUTS2,F2000,0,0,0,,314.4,0
+BE,Belgium,BE31,Prov. Brabant wallon,NUTS2,F2000,0,0,0,,109.1,0
+BE,Belgium,BE32,Prov. Hainaut,NUTS2,F2000,0,0,0,,378.6,0
+BE,Belgium,BE33,Prov. Liège,NUTS2,F2000,0,0,0,,386.2,0
+BE,Belgium,BE34,Prov. Luxembourg (BE),NUTS2,F2000,0,0,0,,444,0
+BE,Belgium,BE35,Prov. Namur,NUTS2,F2000,0,0,0,,366.6,0
+BG,Bulgaria,BG,Bulgaria,NUTS0,F2000,0.03,0,5038.23,0,11037,0
+BG,Bulgaria,BG,Bulgaria,NUTS0,F2000,0.03,0.07,5038.23,0,11037,0
+BG,Bulgaria,BG31,Severozapaden,NUTS2,F2000,0,0,0,,1904.7,0
+BG,Bulgaria,BG32,Severen tsentralen,NUTS2,F2000,0,0,0,,1466.7,0
+BG,Bulgaria,BG33,Severoiztochen,NUTS2,F2000,0,0,0,,1464.5,0
+BG,Bulgaria,BG34,Yugoiztochen,NUTS2,F2000,0,0,0,,1966.4,0
+BG,Bulgaria,BG41,Yugozapaden,NUTS2,F2000,0,0,0,,2004,0
+BG,Bulgaria,BG42,Yuzhen tsentralen,NUTS2,F2000,0,0,0,,2230.7,0
+CY,Cyprus,CY,Cyprus,NUTS0,F2000,0.97,10.24,126.15,2.479,925.1,0.109787
+CZ,Czechia,CZ,Czechia,NUTS0,F2000,0,0,3524.38,0,7886.8,0
+CZ,Czechia,CZ01,Praha,NUTS2,F2000,0,0,0,,49.6,0
+CZ,Czechia,CZ02,Strední Cechy,NUTS2,F2000,0,0,0,,1101.6,0
+CZ,Czechia,CZ03,Jihozápad,NUTS2,F2000,0,0,0,,1761.8,0
+CZ,Czechia,CZ04,Severozápad,NUTS2,F2000,0,0,0,,864.9,0
+CZ,Czechia,CZ05,Severovýchod,NUTS2,F2000,0,0,0,,1244.1,0
+CZ,Czechia,CZ06,Jihovýchod,NUTS2,F2000,0,0,0,,1399.1,0
+CZ,Czechia,CZ07,Strední Morava,NUTS2,F2000,0,0,0,,923,0
+CZ,Czechia,CZ08,Moravskoslezsko,NUTS2,F2000,0,0,0,,542.7,0
+DE,Germany (until 1990 former territory of the FRG),DE,Germany (until 1990 former territory of the FRG),NUTS0,F2000,0,0,16636.98,0,35737.6,0
+DE,Germany (until 1990 former territory of the FRG),DE11,Stuttgart,NUTS2,F2000,0,0,0,,1055.7,0
+DE,Germany (until 1990 former territory of the FRG),DE12,Karlsruhe,NUTS2,F2000,0,0,0,,691.9,0
+DE,Germany (until 1990 former territory of the FRG),DE13,Freiburg,NUTS2,F2000,0,0,0,,935.7,0
+DE,Germany (until 1990 former territory of the FRG),DE14,Tübingen,NUTS2,F2000,0,0,0,,891.8,0
+DE,Germany (until 1990 former territory of the FRG),DE21,Oberbayern,NUTS2,F2000,0,0,0,,1753.1,0
+DE,Germany (until 1990 former territory of the FRG),DE22,Niederbayern,NUTS2,F2000,0,0,0,,1032.9,0
+DE,Germany (until 1990 former territory of the FRG),DE23,Oberpfalz,NUTS2,F2000,0,0,0,,969,0
+DE,Germany (until 1990 former territory of the FRG),DE24,Oberfranken,NUTS2,F2000,0,0,0,,723.1,0
+DE,Germany (until 1990 former territory of the FRG),DE25,Mittelfranken,NUTS2,F2000,0,0,0,,724.5,0
+DE,Germany (until 1990 former territory of the FRG),DE26,Unterfranken,NUTS2,F2000,0,0,0,,853.1,0
+DE,Germany (until 1990 former territory of the FRG),DE27,Schwaben,NUTS2,F2000,0,0,0,,999.3,0
+DE,Germany (until 1990 former territory of the FRG),DE30,Berlin,NUTS2,F2000,0,0,0,,89.2,0
+DE,Germany (until 1990 former territory of the FRG),DE40,Brandenburg,NUTS2,F2000,0,0,0,,2965.4,0
+DE,Germany (until 1990 former territory of the FRG),DE50,Bremen,NUTS2,F2000,0,0,0,,41.9,0
+DE,Germany (until 1990 former territory of the FRG),DE60,Hamburg,NUTS2,F2000,0,0,0,,75.5,0
+DE,Germany (until 1990 former territory of the FRG),DE71,Darmstadt,NUTS2,F2000,0,0,0,,744.5,0
+DE,Germany (until 1990 former territory of the FRG),DE72,Gießen,NUTS2,F2000,0,0,0,,538.1,0
+DE,Germany (until 1990 former territory of the FRG),DE73,Kassel,NUTS2,F2000,0,0,0,,828.9,0
+DE,Germany (until 1990 former territory of the FRG),DE80,Mecklenburg-Vorpommern,NUTS2,F2000,0,0,0,,2321.3,0
+DE,Germany (until 1990 former territory of the FRG),DE91,Braunschweig,NUTS2,F2000,0,0,0,,810,0
+DE,Germany (until 1990 former territory of the FRG),DE92,Hannover,NUTS2,F2000,0,0,0,,904.8,0
+DE,Germany (until 1990 former territory of the FRG),DE93,Lüneburg,NUTS2,F2000,0,0,0,,1549.6,0
+DE,Germany (until 1990 former territory of the FRG),DE94,Weser-Ems,NUTS2,F2000,0,0,0,,1497.1,0
+DE,Germany (until 1990 former territory of the FRG),DEA1,Düsseldorf,NUTS2,F2000,0,0,0,,529.2,0
+DE,Germany (until 1990 former territory of the FRG),DEA2,Köln,NUTS2,F2000,0,0,0,,736.4,0
+DE,Germany (until 1990 former territory of the FRG),DEA3,Münster,NUTS2,F2000,0,0,0,,691.7,0
+DE,Germany (until 1990 former territory of the FRG),DEA4,Detmold,NUTS2,F2000,0,0,0,,652.5,0
+DE,Germany (until 1990 former territory of the FRG),DEA5,Arnsberg,NUTS2,F2000,0,0,0,,801.2,0
+DE,Germany (until 1990 former territory of the FRG),DEB1,Koblenz,NUTS2,F2000,0,0,0,,807.3,0
+DE,Germany (until 1990 former territory of the FRG),DEB2,Trier,NUTS2,F2000,0,0,0,,492.4,0
+DE,Germany (until 1990 former territory of the FRG),DEB3,Rheinhessen-Pfalz,NUTS2,F2000,0,0,0,,685.1,0
+DE,Germany (until 1990 former territory of the FRG),DEC0,Saarland,NUTS2,F2000,0,0,0,,256.9,0
+DE,Germany (until 1990 former territory of the FRG),DED2,Dresden,NUTS2,F2000,0,0,0,,793.1,0
+DE,Germany (until 1990 former territory of the FRG),DED4,Chemnitz,NUTS2,F2000,0,0,0,,652.4,0
+DE,Germany (until 1990 former territory of the FRG),DED5,Leipzig,NUTS2,F2000,0,0,0,,396.5,0
+DE,Germany (until 1990 former territory of the FRG),DEE0,Sachsen-Anhalt,NUTS2,F2000,0,0,0,,2045.2,0
+DE,Germany (until 1990 former territory of the FRG),DEF0,Schleswig-Holstein,NUTS2,F2000,0,0,0,,1580.2,0
+DE,Germany (until 1990 former territory of the FRG),DEG0,Thüringen,NUTS2,F2000,0,0,0,,1620.2,0
+DK,Denmark,DK,Denmark,NUTS0,F2000,0,0,2625.64,0,4292.4,0
+DK,Denmark,DK01,Hovedstaden,NUTS2,F2000,0,0,0,,255.9,0
+DK,Denmark,DK02,Sjælland,NUTS2,F2000,0,0,0,,722.3,0
+DK,Denmark,DK03,Syddanmark,NUTS2,F2000,0,0,0,,1225.6,0
+DK,Denmark,DK04,Midtjylland,NUTS2,F2000,0,0,0,,1300.6,0
+DK,Denmark,DK05,Nordjylland,NUTS2,F2000,0,0,0,,787.9,0
+EE,Estonia,EE,Estonia,NUTS0,F2000,0,0,985.41,0,4522.7,0
+EE,Estonia,EE00,Eesti,NUTS2,F2000,0,0,0,,4522.7,0
+EL,Greece,EL,Greece,NUTS0,F2000,15.15,318.37,5199.68,1.581,13204.9,0.118238
+EL,Greece,EL11,"Anatoliki Makedonia, Thraki (NUTS 2010)",NUTS2,F2000,0,0,0,,,
+EL,Greece,EL12,Kentriki Makedonia (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL13,Dytiki Makedonia (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL14,Thessalia (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL21,Ipeiros (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL22,Ionia Nisia (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL23,Dytiki Ellada (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL24,Sterea Ellada (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL25,Peloponnisos (NUTS 2010),NUTS2,F2000,0,0,0,,,
+EL,Greece,EL30,Attiki,NUTS2,F2000,0.15,1.89,5.22,2.868,381.4,0.039256
+EL,Greece,EL41,Voreio Aigaio,NUTS2,F2000,0.09,1.1,3.04,2.868,385.4,0.022664
+EL,Greece,EL42,Notio Aigaio,NUTS2,F2000,0.04,0.47,1.3,2.868,530.5,0.007056
+EL,Greece,EL43,Kriti,NUTS2,F2000,0.7,8.8,24.35,2.868,834,0.083782
+EL,Greece,EL51,"Anatoliki Makedonia, Thraki",NUTS2,F2000,2.27,28.6,79.13,2.868,1417.9,0.160162
+EL,Greece,EL52,Kentriki Makedonia,NUTS2,F2000,5.39,67.88,187.83,2.868,1916.6,0.28124
+EL,Greece,EL53,Dytiki Makedonia,NUTS2,F2000,0.02,0.31,0.87,2.868,947.1,0.002634
+EL,Greece,EL54,Ipeiros,NUTS2,F2000,1.52,19.17,53.04,2.868,916.4,0.166112
+EL,Greece,EL61,Thessalia,NUTS2,F2000,0.7,8.8,24.35,2.868,1405.1,0.04973
+EL,Greece,EL62,Ionia Nisia,NUTS2,F2000,0.01,0.16,0.43,2.868,230.6,0.00541
+EL,Greece,EL63,Dytiki Ellada,NUTS2,F2000,0.61,7.7,21.3,2.868,1132.7,0.053976
+EL,Greece,EL64,Sterea Ellada,NUTS2,F2000,2.23,28.12,77.83,2.868,1556.1,0.14353
+EL,Greece,EL65,Peloponnisos,NUTS2,F2000,2.15,27.02,74.78,2.868,1551.1,0.13836
+ES,Spain,ES,Spain,NUTS0,F2000,73.97,1184.53,24253.86,2.346,50594.4,0.128886
+ES,Spain,ES11,Galicia,NUTS2,F2000,0.31,1.37,7.07,4.39,2957.5,0.0105
+ES,Spain,ES12,Principado de Asturias,NUTS2,F2000,0.17,0.74,3.86,4.39,1060.3,0.015978
+ES,Spain,ES13,Cantabria,NUTS2,F2000,0.01,0.06,0.32,4.39,532.7,0.002648
+ES,Spain,ES21,País Vasco,NUTS2,F2000,0.07,0.31,1.61,4.39,722.8,0.009766
+ES,Spain,ES22,Comunidad Foral de Navarra,NUTS2,F2000,0,0,0,,1039,0
+ES,Spain,ES23,La Rioja,NUTS2,F2000,0,0,0,,504.5,0
+ES,Spain,ES24,Aragón,NUTS2,F2000,0.16,0.68,3.54,4.39,4772,0.003256
+ES,Spain,ES30,Comunidad de Madrid,NUTS2,F2000,0.01,0.06,0.32,4.39,802.8,0.001758
+ES,Spain,ES41,Castilla y León,NUTS2,F2000,0.27,1.18,6.11,4.39,9422.7,0.002848
+ES,Spain,ES42,Castilla-la Mancha,NUTS2,F2000,0.93,4.1,21.21,4.39,7946.2,0.011724
+ES,Spain,ES43,Extremadura,NUTS2,F2000,3.57,15.71,81.31,4.39,4161.1,0.085838
+ES,Spain,ES51,Cataluña,NUTS2,F2000,0.44,1.92,9.96,4.39,3209,0.013638
+ES,Spain,ES52,Comunitat Valenciana,NUTS2,F2000,17.55,77.16,399.46,4.39,2325.7,0.754542
+ES,Spain,ES53,Illes Balears,NUTS2,F2000,0.69,3.04,15.75,4.39,499.2,0.138574
+ES,Spain,ES61,Andalucía,NUTS2,F2000,15.95,70.15,363.15,4.39,8759.7,0.182116
+ES,Spain,ES62,Región de Murcia,NUTS2,F2000,0.38,1.68,8.68,4.39,1131.4,0.033692
+ES,Spain,ES63,Ciudad de Ceuta,NUTS2,F2000,0,0,0,,2,0
+ES,Spain,ES64,Ciudad de Melilla,NUTS2,F2000,0,0,0,,1.3,0
+ES,Spain,ES70,Canarias,NUTS2,F2000,15.05,66.17,342.58,4.39,744.5,2.021424
+FI,Finland,FI,Finland,NUTS0,F2000,0,0,2271.18,0,33844,0
+FI,Finland,FI19,Länsi-Suomi,NUTS2,F2000,0,0,0,,6476.3,0
+FI,Finland,FI1B,Helsinki-Uusimaa,NUTS2,F2000,0,0,0,,956.8,0
+FI,Finland,FI1C,Etelä-Suomi,NUTS2,F2000,0,0,0,,3537.8,0
+FI,Finland,FI1D,Pohjois- ja Itä-Suomi,NUTS2,F2000,0,0,0,,22715,0
+FI,Finland,FI20,Åland,NUTS2,F2000,0,0,0,,158.1,0
+FR,France,FR,France,NUTS0,F2000,17.95,304.19,29010.89,0.30625,63318.66,0.026933
+FR,France,FR10,Île de France,NUTS2,F2000,0,0,0,,1201.23,0
+FR,France,FRB0,Centre - Val de Loire,NUTS2,F2000,0,0,0,,3915.09,0
+FR,France,FRC1,Bourgogne,NUTS2,F2000,0,0,0,,3158.2,0
+FR,France,FRC2,Franche-Comté,NUTS2,F2000,0,0,0,,1620.23,0
+FR,France,FRD1,Basse-Normandie,NUTS2,F2000,0,0,0,,1758.93,0
+FR,France,FRD2,Haute-Normandie,NUTS2,F2000,0,0,0,,1231.74,0
+FR,France,FRE1,Nord-Pas-de-Calais,NUTS2,F2000,0,0,0,,1241.41,0
+FR,France,FRE2,Picardie,NUTS2,F2000,0,0,0,,1939.95,0
+FR,France,FRF1,Alsace,NUTS2,F2000,0,0,0,,828.02,0
+FR,France,FRF2,Champagne-Ardenne,NUTS2,F2000,0,0,0,,2560.58,0
+FR,France,FRF3,Lorraine,NUTS2,F2000,0,0,0,,2354.74,0
+FR,France,FRG0,Pays-de-la-Loire,NUTS2,F2000,0.05,0.78,8.39,0.555,3208.18,0.001484
+FR,France,FRH0,Bretagne,NUTS2,F2000,0.02,0.39,4.2,0.555,2720.79,0.000874
+FR,France,FRI1,Aquitaine,NUTS2,F2000,1.9,31.35,335.73,0.555,4130.84,0.046082
+FR,France,FRI2,Limousin,NUTS2,F2000,0,0,0,,1694.23,0
+FR,France,FRI3,Poitou-Charentes,NUTS2,F2000,0.05,0.78,8.39,0.555,2580.95,0.001844
+FR,France,FRJ1,Languedoc-Roussillon,NUTS2,F2000,0.29,4.7,50.36,0.555,2737.58,0.010428
+FR,France,FRJ2,Midi-Pyrénées,NUTS2,F2000,0.79,12.93,138.49,0.555,4534.79,0.017316
+FR,France,FRK1,Auvergne,NUTS2,F2000,0,0,0,,2601.29,0
+FR,France,FRK2,Rhône-Alpes,NUTS2,F2000,0.21,3.53,37.77,0.555,4369.82,0.0049
+FR,France,FRL0,Provence-Alpes-Côte d'Azur,NUTS2,F2000,0.59,9.8,104.91,0.555,3139.96,0.018946
+FR,France,FRM0,Corse,NUTS2,F2000,0.29,4.7,50.36,0.555,867.98,0.032896
+FR,France,FRY1,Guadeloupe,NUTS2,F2000,2.15,35.46,379.79,0.555,132.86,1.62087
+FR,France,FRY2,Martinique,NUTS2,F2000,6.08,100.11,1072.22,0.555,112.8,5.38984
+FR,France,FRY3,Guyane,NUTS2,F2000,2.57,42.32,453.23,0.555,8353.39,0.030764
+FR,France,FRY4,La Réunion,NUTS2,F2000,2.64,43.49,465.82,0.555,250.37,1.054954
+FR,France,FRY5,Mayotte,NUTS2,F2000,0,0,0,,37.4,0
+HR,Croatia,HR,Croatia,NUTS0,F2000,0.42,0.77,1493.86,0.987,5659.4,0.007338
+HR,Croatia,HR03,Jadranska Hrvatska,NUTS2,F2000,0.49,1.66,25.27,1.944,2470.5,0.01987
+HR,Croatia,HR04,Kontinentalna Hrvatska (NUTS 2016),NUTS2,F2000,0,0,0,,3188.9,0
+HU,Hungary,HU,Hungary,NUTS0,F2000,0,0,5210.49,0,9301.1,0
+HU,Hungary,HU10,Közép-Magyarország (NUTS 2013),NUTS2,F2000,0,0,0,,691.5,0
+HU,Hungary,HU21,Közép-Dunántúl,NUTS2,F2000,0,0,0,,1108.5,0
+HU,Hungary,HU22,Nyugat-Dunántúl,NUTS2,F2000,0,0,0,,1132.8,0
+HU,Hungary,HU23,Dél-Dunántúl,NUTS2,F2000,0,0,0,,1419.7,0
+HU,Hungary,HU31,Észak-Magyarország,NUTS2,F2000,0,0,0,,1342.8,0
+HU,Hungary,HU32,Észak-Alföld,NUTS2,F2000,0,0,0,,1772.3,0
+HU,Hungary,HU33,Dél-Alföld,NUTS2,F2000,0,0,0,,1833.5,0
+IE,Ireland,IE,Ireland,NUTS0,F2000,0,0,4475.59,0,6979.7,0
+IE,Ireland,IE01,"Border, Midland and Western (NUTS 2013)",NUTS2,F2000,0,0,0,,3325.2,0
+IE,Ireland,IE02,Southern and Eastern (NUTS 2013),NUTS2,F2000,0,0,0,,3654.5,0
+IT,Italy,IT,Italy,NUTS0,F2000,32.69,617.55,13034.85,1.555555556,30207.3,0.099504444
+IT,Italy,ITC1,Piemonte,NUTS2,F2000,3.42,,107.16,3.1875,2538.7,0.13456
+IT,Italy,ITC1,Piemonte,NUTS2,F2000,3.42,43.93,107.16,3.1875,2538.7,0.13456
+IT,Italy,ITC2,Valle d'Aosta/Vallée d'Aoste,NUTS2,F2000,0,,0,,326.1,0
+IT,Italy,ITC2,Valle d'Aosta/Vallée d'Aoste,NUTS2,F2000,0,0,0,,326.1,0
+IT,Italy,ITC3,Liguria,NUTS2,F2000,0.01,,0.33,3.1875,541.6,0.001965
+IT,Italy,ITC3,Liguria,NUTS2,F2000,0.01,0.14,0.33,3.1875,541.6,0.001965
+IT,Italy,ITC4,Lombardia,NUTS2,F2000,0.92,,28.71,3.1875,2386.4,0.0383525
+IT,Italy,ITC4,Lombardia,NUTS2,F2000,0.92,11.77,28.71,3.1875,2386.4,0.0383525
+IT,Italy,ITF1,Abruzzo,NUTS2,F2000,0,,0,,1083.3,0
+IT,Italy,ITF1,Abruzzo,NUTS2,F2000,0,0,0,,1083.3,0
+IT,Italy,ITF2,Molise,NUTS2,F2000,0,,0,,446.1,0
+IT,Italy,ITF2,Molise,NUTS2,F2000,0,0,0,,446.1,0
+IT,Italy,ITF3,Campania,NUTS2,F2000,1.78,,55.75,3.1875,1367,0.1300075
+IT,Italy,ITF3,Campania,NUTS2,F2000,1.78,22.85,55.75,3.1875,1367,0.1300075
+IT,Italy,ITF4,Puglia,NUTS2,F2000,0.21,,6.68,3.1875,1954.1,0.0108925
+IT,Italy,ITF4,Puglia,NUTS2,F2000,0.21,2.74,6.68,3.1875,1954.1,0.0108925
+IT,Italy,ITF5,Basilicata,NUTS2,F2000,0.39,,12.35,3.1875,1007.3,0.03909
+IT,Italy,ITF5,Basilicata,NUTS2,F2000,0.39,5.06,12.35,3.1875,1007.3,0.03909
+IT,Italy,ITF6,Calabria,NUTS2,F2000,1.68,,52.75,3.1875,1522.2,0.1104625
+IT,Italy,ITF6,Calabria,NUTS2,F2000,1.68,21.62,52.75,3.1875,1522.2,0.1104625
+IT,Italy,ITG1,Sicilia,NUTS2,F2000,1.16,,36.39,3.1875,2583.3,0.0449025
+IT,Italy,ITG1,Sicilia,NUTS2,F2000,1.16,14.92,36.39,3.1875,2583.3,0.0449025
+IT,Italy,ITG2,Sardegna,NUTS2,F2000,0.01,,0.33,3.1875,2410,0.0004375
+IT,Italy,ITG2,Sardegna,NUTS2,F2000,0.01,0.14,0.33,3.1875,2410,0.0004375
+IT,Italy,ITH1,Provincia Autonoma di Bolzano/Bozen,NUTS2,F2000,0,,0,,739.8,0
+IT,Italy,ITH1,Provincia Autonoma di Bolzano/Bozen,NUTS2,F2000,0,0,0,,739.8,0
+IT,Italy,ITH2,Provincia Autonoma di Trento,NUTS2,F2000,0.1,,3,3.1875,620.7,0.01543
+IT,Italy,ITH2,Provincia Autonoma di Trento,NUTS2,F2000,0.1,1.23,3,3.1875,620.7,0.01543
+IT,Italy,ITH3,Veneto,NUTS2,F2000,4.44,,139.21,3.1875,1840.7,0.24109
+IT,Italy,ITH3,Veneto,NUTS2,F2000,4.44,57.07,139.21,3.1875,1840.7,0.24109
+IT,Italy,ITH4,Friuli-Venezia Giulia,NUTS2,F2000,0.71,,22.37,3.1875,786.2,0.0906925
+IT,Italy,ITH4,Friuli-Venezia Giulia,NUTS2,F2000,0.71,9.17,22.37,3.1875,786.2,0.0906925
+IT,Italy,ITH5,Emilia-Romagna,NUTS2,F2000,3.91,,122.52,3.1875,2245.3,0.1739475
+IT,Italy,ITH5,Emilia-Romagna,NUTS2,F2000,3.91,50.22,122.52,3.1875,2245.3,0.1739475
+IT,Italy,ITI1,Toscana,NUTS2,F2000,0.19,,6.01,3.1875,2298.8,0.008335
+IT,Italy,ITI1,Toscana,NUTS2,F2000,0.19,2.46,6.01,3.1875,2298.8,0.008335
+IT,Italy,ITI2,Umbria,NUTS2,F2000,0,,0,,846.4,0
+IT,Italy,ITI2,Umbria,NUTS2,F2000,0,0,0,,846.4,0
+IT,Italy,ITI3,Marche,NUTS2,F2000,0.06,,2,3.1875,940.1,0.0067925
+IT,Italy,ITI3,Marche,NUTS2,F2000,0.06,0.82,2,3.1875,940.1,0.0067925
+IT,Italy,ITI4,Lazio,NUTS2,F2000,7.12,,223.34,3.1875,1723.2,0.41316
+IT,Italy,ITI4,Lazio,NUTS2,F2000,7.12,91.55,223.34,3.1875,1723.2,0.41316
+LT,Lithuania,LT,Lithuania,NUTS0,F2000,0,0,2947.62,0,6528.6,0
+LT,Lithuania,LT00,Lietuva (NUTS 2013),NUTS2,F2000,0,0,0,,6528.6,0
+LU,Luxembourg,LU,Luxembourg,NUTS0,F2000,0,0,131.85,0,258.6,0
+LU,Luxembourg,LU00,Luxembourg,NUTS2,F2000,0,0,0,,258.6,0
+LV,Latvia,LV,Latvia,NUTS0,F2000,0,0,1953.72,0,6457.3,0
+LV,Latvia,LV00,Latvija,NUTS2,F2000,0,0,0,,6457.3,0
+MT,Malta,MT,Malta,NUTS0,F2000,0,0,11.23,0,31.54,0
+MT,Malta,MT00,Malta,NUTS2,F2000,0,0,0,,31.54,0
+NL,Netherlands,NL,Netherlands,NUTS0,F2000,0,0,1811.01,0,4154,0
+NL,Netherlands,NL11,Groningen,NUTS2,F2000,0,0,0,,296,0
+NL,Netherlands,NL12,Friesland (NL),NUTS2,F2000,0,0,0,,574.9,0
+NL,Netherlands,NL13,Drenthe,NUTS2,F2000,0,0,0,,268,0
+NL,Netherlands,NL21,Overijssel,NUTS2,F2000,0,0,0,,342.1,0
+NL,Netherlands,NL22,Gelderland,NUTS2,F2000,0,0,0,,513.6,0
+NL,Netherlands,NL23,Flevoland,NUTS2,F2000,0,0,0,,241.2,0
+NL,Netherlands,NL31,Utrecht,NUTS2,F2000,0,0,0,,144.9,0
+NL,Netherlands,NL32,Noord-Holland,NUTS2,F2000,0,0,0,,409.1,0
+NL,Netherlands,NL33,Zuid-Holland,NUTS2,F2000,0,0,0,,341.8,0
+NL,Netherlands,NL34,Zeeland,NUTS2,F2000,0,0,0,,293.3,0
+NL,Netherlands,NL41,Noord-Brabant,NUTS2,F2000,0,0,0,,508.2,0
+NL,Netherlands,NL42,Limburg (NL),NUTS2,F2000,0,0,0,,220.9,0
+PL,Poland,PL,Poland,NUTS0,F2000,0,0,14572.84,0,31267.9,0
+PL,Poland,PL11,Lódzkie (NUTS 2013),NUTS2,F2000,0,0,0,,1821.9,0
+PL,Poland,PL12,Mazowieckie (NUTS 2013),NUTS2,F2000,0,0,0,,3555.8,0
+PL,Poland,PL21,Malopolskie,NUTS2,F2000,0,0,0,,1518.3,0
+PL,Poland,PL22,Slaskie,NUTS2,F2000,0,0,0,,1233.3,0
+PL,Poland,PL31,Lubelskie (NUTS 2013),NUTS2,F2000,0,0,0,,2512.2,0
+PL,Poland,PL32,Podkarpackie (NUTS 2013),NUTS2,F2000,0,0,0,,1784.6,0
+PL,Poland,PL33,Swietokrzyskie (NUTS 2013),NUTS2,F2000,0,0,0,,1171.1,0
+PL,Poland,PL34,Podlaskie (NUTS 2013),NUTS2,F2000,0,0,0,,2018.7,0
+PL,Poland,PL41,Wielkopolskie,NUTS2,F2000,0,0,0,,2982.6,0
+PL,Poland,PL42,Zachodniopomorskie,NUTS2,F2000,0,0,0,,2289.2,0
+PL,Poland,PL43,Lubuskie,NUTS2,F2000,0,0,0,,1398.8,0
+PL,Poland,PL51,Dolnoslaskie,NUTS2,F2000,0,0,0,,1994.7,0
+PL,Poland,PL52,Opolskie,NUTS2,F2000,0,0,0,,941.2,0
+PL,Poland,PL61,Kujawsko-Pomorskie,NUTS2,F2000,0,0,0,,1797.2,0
+PL,Poland,PL62,Warminsko-Mazurskie,NUTS2,F2000,0,0,0,,2417.3,0
+PL,Poland,PL63,Pomorskie,NUTS2,F2000,0,0,0,,1831,0
+PT,Portugal,PT,Portugal,NUTS0,F2000,12.67,83,3875.79,3.273,9222.6,0.10084
+PT,Portugal,PT11,Norte,NUTS2,F2000,2.82,9.32,45.19,6.222,2128.6,0.132646
+PT,Portugal,PT15,Algarve,NUTS2,F2000,0.53,1.76,8.56,6.222,499.7,0.107032
+PT,Portugal,PT16,Centro (PT),NUTS2,F2000,0.95,3.12,15.13,6.222,2819.9,0.033524
+PT,Portugal,PT17,Área Metropolitana de Lisboa,NUTS2,F2000,0.01,0.04,0.2,6.222,301.5,0.004128
+PT,Portugal,PT18,Alentejo,NUTS2,F2000,0.07,0.25,1.19,6.222,3160.5,0.00236
+PT,Portugal,PT20,Região Autónoma dos Açores (PT),NUTS2,F2000,0.57,1.89,9.16,6.222,232.2,0.246406
+PT,Portugal,PT30,Região Autónoma da Madeira (PT),NUTS2,F2000,1.09,3.61,17.52,6.222,80.2,1.364788
+RO,Romania,RO,Romania,NUTS0,F2000,0,0,13348.99,0,23839.07,0
+RO,Romania,RO11,Nord-Vest,NUTS2,F2000,0,0,0,,3416.05,0
+RO,Romania,RO12,Centru,NUTS2,F2000,0,0,0,,3409.97,0
+RO,Romania,RO21,Nord-Est,NUTS2,F2000,0,0,0,,3684.98,0
+RO,Romania,RO22,Sud-Est,NUTS2,F2000,0,0,0,,3576.17,0
+RO,Romania,RO31,Sud - Muntenia,NUTS2,F2000,0,0,0,,3445.3,0
+RO,Romania,RO32,Bucuresti - Ilfov,NUTS2,F2000,0,0,0,,182.12,0
+RO,Romania,RO41,Sud-Vest Oltenia,NUTS2,F2000,0,0,0,,2921.17,0
+RO,Romania,RO42,Vest,NUTS2,F2000,0,0,0,,3203.32,0
+SE,Sweden,SE,Sweden,NUTS0,F2000,0,0,3005,0,43857.4,0
+SE,Sweden,SE11,Stockholm,NUTS2,F2000,0,0,0,,677.9,0
+SE,Sweden,SE12,Östra Mellansverige,NUTS2,F2000,0,0,0,,4120.4,0
+SE,Sweden,SE21,Småland med öarna,NUTS2,F2000,0,0,0,,3538.2,0
+SE,Sweden,SE22,Sydsverige,NUTS2,F2000,0,0,0,,1434.1,0
+SE,Sweden,SE23,Västsverige,NUTS2,F2000,0,0,0,,3093.4,0
+SE,Sweden,SE31,Norra Mellansverige,NUTS2,F2000,0,0,0,,6914.8,0
+SE,Sweden,SE32,Mellersta Norrland,NUTS2,F2000,0,0,0,,7670.9,0
+SE,Sweden,SE33,Övre Norrland,NUTS2,F2000,0,0,0,,16407.7,0
+SI,Slovenia,SI,Slovenia,NUTS0,F2000,0.16,1.82,480.54,0.032,2027.3,0.005
+SI,Slovenia,SI01,Vzhodna Slovenija (NUTS 2010),NUTS2,F2000,0,0,0,,,
+SI,Slovenia,SI02,Zahodna Slovenija (NUTS 2010),NUTS2,F2000,0,0,0,,,
+SI,Slovenia,SI03,Vzhodna Slovenija,NUTS2,F2000,0,0,0,,1243.31,0
+SI,Slovenia,SI04,Zahodna Slovenija,NUTS2,F2000,0,0,0,,783.99,0
+SK,Slovakia,SK,Slovakia,NUTS0,F2000,0,0,1902.42,0,4903.5,0
+SK,Slovakia,SK01,Bratislavský kraj,NUTS2,F2000,0,0,0,,205.3,0
+SK,Slovakia,SK02,Západné Slovensko,NUTS2,F2000,0,0,0,,1499.2,0
+SK,Slovakia,SK03,Stredné Slovensko,NUTS2,F2000,0,0,0,,1626.3,0
+SK,Slovakia,SK04,Východné Slovensko,NUTS2,F2000,0,0,0,,1572.7,0
