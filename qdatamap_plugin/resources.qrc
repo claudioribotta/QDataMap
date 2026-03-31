@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/qgis_data_mapping" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>

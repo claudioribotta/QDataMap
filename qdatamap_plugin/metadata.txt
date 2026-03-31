@@ -1,0 +1,32 @@
+[general]
+name=QDataMap
+qgisMinimumVersion=3.0
+description=This plugin prints geospatially explicit tabular data
+version=1.0
+author=claudio.ribotta
+email=claudio.ribotta@outlook.com
+
+about=This plugin iteratively prints geospatially explicit tabular datasets with which a set of polygons can be associated
+
+tracker=https://github.com/claudioribotta/QDataMap_release/issues
+repository=https://github.com/claudioribotta/QDataMap_release
+license=GPL-3
+
+
+# Recommended items:
+
+hasProcessingProvider=no
+changelog=Version 1.0 - First stable release
+
+# Tags are comma separated with spaces allowed
+tags=python, print, layout, vector, csv, join
+
+homepage=https://github.com/claudioribotta/QDataMap_release
+category=Plugins
+icon=icon.png
+experimental=False
+deprecated=False
+
+# plugin_dependencies=
+server=False
+
