@@ -440,11 +440,14 @@ class qdatamap_plugin:
         """Run method that shows the plugin dialog."""
         # One-time initialization
         if self.first_start:
-            self.first_start = False
-
-            # Check and install dependencies
+            # Check dependencies before marking first_start done,
+            # so that if the user cancels/fails, the next run() call
+            # retries initialization instead of skipping it (which would
+            # leave self.dlg undefined and crash reset_ui_state)
             if not self.check_and_install_dependencies():
                 return
+
+            self.first_start = False
 
             # Initialize dialog
             self.dlg = qdatamapdialog()
