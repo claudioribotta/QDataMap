@@ -1,6 +1,8 @@
 # QDataMap
 QDataMap QGIS3 plugin – Release 1.1
 
+This plugin iteratively prints geospatially explicit tabular datasets with which a set of polygons can be associated
+
 ## Installation
 
 **Requirements:** QGIS 3.44
@@ -15,6 +17,6 @@ On first run, the plugin will detect and offer to automatically install any miss
 If auto-install fails, open the QGIS Python console and run:
 
 ```
-import pip
-pip.main(['install', 'pandas', 'chardet', 'matplotlib', 'seaborn'])
+import subprocess, sys, os
+subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', 'pandas', 'chardet', 'matplotlib', 'seaborn'])
 ```
