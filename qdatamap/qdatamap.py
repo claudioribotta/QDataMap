@@ -274,7 +274,7 @@ class qdatamap_plugin:
                 f"The plugin requires these packages to work:\n"
                 f"{', '.join(missing_packages)}\n\n"
                 f"Please install them manually using the QGIS Python console:\n"
-                f"!pip install {' '.join(missing_packages)}"
+                f"import subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', {', '.join(repr(p) for p in missing_packages)}])"
             )
             return False
 
@@ -287,7 +287,7 @@ class qdatamap_plugin:
                 None, "Installation Failed",
                 f"Failed to install: {', '.join(failed_packages)}\n\n"
                 f"Please install them manually using the QGIS Python console:\n"
-                f"!pip install {' '.join(failed_packages)}"
+                f"import subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', {', '.join(repr(p) for p in failed_packages)}])"
             )
             return False
 
