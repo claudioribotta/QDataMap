@@ -2,7 +2,7 @@
 name=QDataMap
 qgisMinimumVersion=3.0
 description=This plugin prints geospatially explicit tabular data
-version=1.0
+version=1.
 author=claudio.ribotta
 email=claudio.ribotta@outlook.com
 
@@ -16,7 +16,7 @@ license=GPL-3
 # Recommended items:
 
 hasProcessingProvider=no
-changelog=Version 1.1 - First stable release
+changelog=Version 1. - First stable release
 
 # Tags are comma separated with spaces allowed
 tags=python, print, layout, vector, csv, join

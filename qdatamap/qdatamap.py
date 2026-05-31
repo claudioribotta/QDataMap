@@ -214,9 +214,12 @@ class qdatamap_plugin:
         try:
             QgsMessageLog.logMessage(f"Installing {package_name}...", "QDataMap", Qgis.Info)
 
-            # Install using QGIS Python interpreter (sys.executable)
+            import os
+            python_exe = os.path.join(sys.exec_prefix, 'python.exe')
+            if not os.path.isfile(python_exe):
+                python_exe = sys.executable  # fallback for non-Windows
             result = subprocess.run(
-                [sys.executable, '-m', 'pip', 'install', package_name],
+                [python_exe, '-m', 'pip', 'install', package_name],
                 capture_output=True,
                 text=True,
                 timeout=120
@@ -274,7 +277,7 @@ class qdatamap_plugin:
                 f"The plugin requires these packages to work:\n"
                 f"{', '.join(missing_packages)}\n\n"
                 f"Please install them manually using the QGIS Python console:\n"
-                f"import subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', {', '.join(repr(p) for p in missing_packages)}])"
+                f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(p) for p in missing_packages)}])"
             )
             return False
 
@@ -287,7 +290,7 @@ class qdatamap_plugin:
                 None, "Installation Failed",
                 f"Failed to install: {', '.join(failed_packages)}\n\n"
                 f"Please install them manually using the QGIS Python console:\n"
-                f"import subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', {', '.join(repr(p) for p in failed_packages)}])"
+                f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(p) for p in failed_packages)}])"
             )
             return False
 
