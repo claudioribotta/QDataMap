@@ -14,31 +14,30 @@ __copyright__ = 'Copyright 2025, claudio.ribotta'
 
 import unittest
 
-from qgis.PyQt.QtGui import QIcon
+from .qgis_stubs import ensure_qgis_app, qgis_available
+
+QGIS_AVAILABLE = qgis_available()
+
+if QGIS_AVAILABLE:
+    ensure_qgis_app()
 
 
-
-class geodata_printDialogTest(unittest.TestCase):
-    """Test rerources work."""
-
-    def setUp(self):
-        """Runs before each test."""
-        pass
-
-    def tearDown(self):
-        """Runs after each test."""
-        pass
+@unittest.skipUnless(QGIS_AVAILABLE, 'QGIS environment required')
+class QDataMapResourcesTest(unittest.TestCase):
+    """Test resources work."""
 
     def test_icon_png(self):
-        """Test we can click OK."""
-        path = ':/plugins/geodata_print/icon.png'
+        """The plugin icon is registered in the compiled Qt resources."""
+        from qgis.PyQt.QtGui import QIcon
+        from qgis.PyQt.QtCore import QFile
+        from .. import resources  # noqa: F401  # registers the resources
+
+        # Prefix as declared in resources.qrc
+        path = ':/plugins/qgis_data_mapping/icon.png'
+        self.assertTrue(QFile.exists(path))
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
 
+
 if __name__ == "__main__":
-    suite = unittest.makeSuite(geodata_printResourcesTest)
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
-
-
-
+    unittest.main()

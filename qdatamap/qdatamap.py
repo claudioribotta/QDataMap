@@ -40,6 +40,437 @@ import csv
 import gc
 import tempfile
 import importlib.util
+import importlib.metadata
+import json
+import time
+import threading
+import platform
+
+# Exact dependency versions this release is validated against.
+# Bound to QGIS 3.40 LTR; see requirements.txt and Section 4.5 of the manuscript.
+PINNED_DEPENDENCIES = {
+    "pandas": "2.3.1",
+    "matplotlib": "3.10.0",
+    "seaborn": "0.13.2",
+    "chardet": "5.2.0",
+    "psutil": "7.2.2",
+}
+QDATAMAP_VERSION = "1.1"
+QGIS_LTR_TARGET = "3.40"
+
+# Sampling interval, in seconds, of the resource monitor.
+# Declared here because the reported CPU peak depends on it.
+RESOURCE_SAMPLING_INTERVAL = 0.2
+
+# Widget classes of qdatamap_dialog_base.ui that carry a user-set value.
+# collect_ui_configuration() dumps exactly the widgets of these classes;
+# labels, buttons, group boxes and containers are excluded.
+VALUE_WIDGET_CLASSES = (
+    'QCheckBox', 'QComboBox', 'QDoubleSpinBox', 'QLineEdit', 'QPlainTextEdit',
+    'QSpinBox', 'QgsColorButton', 'QgsColorRampButton', 'QgsFieldComboBox',
+    'QgsFieldExpressionWidget', 'QgsFontButton', 'QgsProjectionSelectionWidget',
+    'QgsSymbolButton',
+)
+
+
+class ResourceMonitor:
+    """Samples RSS and CPU of the current process on a dedicated daemon thread.
+
+    perform_the_work() blocks the main thread for whole seconds inside C++
+    calls (join, rendering, export), so a QTimer would fire only a handful of
+    times per map and the reported peak would be a sampling artefact. psutil
+    reads directly from the OS and does not need the Qt event loop.
+
+    The monitor must never raise towards the caller nor prevent QGIS from
+    closing: the thread is a daemon and the sampling loop swallows exceptions.
+    """
+
+    def __init__(self, interval=RESOURCE_SAMPLING_INTERVAL):
+        self.interval = interval
+        self._thread = None
+        self._stop_event = threading.Event()
+        self._process = None
+        self._cpu_samples = []
+        self._rss_samples = []
+        self._rss_start = None
+        self._failed = False
+
+    def start(self):
+        try:
+            import psutil
+            self._process = psutil.Process()
+            # The first cpu_percent() call always returns 0.0: prime the
+            # reference here and discard that value.
+            self._process.cpu_percent()
+            self._rss_start = self._process.memory_info().rss
+        except Exception:
+            self._failed = True
+            return
+        self._stop_event.clear()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _run(self):
+        while not self._stop_event.is_set():
+            try:
+                self._cpu_samples.append(self._process.cpu_percent())
+                self._rss_samples.append(self._process.memory_info().rss)
+            except Exception:
+                pass
+            self._stop_event.wait(self.interval)
+
+    def stop(self):
+        """Stop sampling and return the collected CPU/memory metrics.
+
+        Fields that could not be measured are absent from the returned dict;
+        the report builders render them as 'not available'.
+        """
+        metrics = {
+            'sampling_interval': self.interval,
+            'samples_count': 0,
+        }
+        if self._thread is not None:
+            self._stop_event.set()
+            self._thread.join(timeout=5)
+        if self._failed or self._process is None:
+            return metrics
+
+        logical_cores = None
+        try:
+            import psutil
+            logical_cores = psutil.cpu_count(logical=True)
+        except Exception:
+            pass
+        if not logical_cores:
+            logical_cores = 1
+        metrics['cpu_logical_cores'] = logical_cores
+
+        metrics['samples_count'] = len(self._cpu_samples)
+        if self._cpu_samples:
+            cpu_peak = max(self._cpu_samples)
+            cpu_mean = sum(self._cpu_samples) / len(self._cpu_samples)
+            metrics['cpu_percent_peak_raw'] = cpu_peak
+            metrics['cpu_percent_mean_raw'] = cpu_mean
+            metrics['cpu_percent_peak_normalized'] = cpu_peak / logical_cores
+            metrics['cpu_percent_mean_normalized'] = cpu_mean / logical_cores
+
+        rss_end = None
+        try:
+            rss_end = self._process.memory_info().rss
+        except Exception:
+            pass
+        if self._rss_start is not None:
+            metrics['rss_start'] = self._rss_start
+            rss_candidates = list(self._rss_samples)
+            rss_candidates.append(self._rss_start)
+            if rss_end is not None:
+                rss_candidates.append(rss_end)
+            metrics['rss_peak'] = max(rss_candidates)
+            if rss_end is not None:
+                metrics['rss_end'] = rss_end
+            metrics['rss_delta'] = metrics['rss_peak'] - self._rss_start
+        return metrics
+
+
+def collect_environment_info(resolved_versions=None, matches_pin=None):
+    """Return the Section 1 (Environment) fields shared by both reports.
+
+    Values that cannot be determined are set to None and rendered as
+    'not available' by the report builders.
+    """
+    import datetime
+
+    info = {}
+    info['timestamp'] = datetime.datetime.now().astimezone().isoformat(timespec='seconds')
+    info['plugin_version'] = QDATAMAP_VERSION
+    try:
+        info['qgis_version'] = Qgis.QGIS_VERSION
+    except Exception:
+        info['qgis_version'] = None
+    info['qgis_ltr_target'] = QGIS_LTR_TARGET
+    info['dependencies_pinned'] = dict(PINNED_DEPENDENCIES)
+    info['dependencies_resolved'] = resolved_versions
+    info['environment_matches_pin'] = matches_pin
+
+    try:
+        info['os'] = platform.platform()
+    except Exception:
+        info['os'] = None
+    try:
+        info['python_version'] = platform.python_version()
+    except Exception:
+        info['python_version'] = None
+    try:
+        processor = platform.processor()
+        info['processor'] = processor if processor else None
+    except Exception:
+        info['processor'] = None
+
+    info['cpu_cores_physical'] = None
+    info['cpu_cores_logical'] = None
+    info['cpu_freq_max_mhz'] = None
+    info['ram_total_bytes'] = None
+    try:
+        import psutil
+        info['cpu_cores_physical'] = psutil.cpu_count(logical=False)
+        info['cpu_cores_logical'] = psutil.cpu_count(logical=True)
+        freq = psutil.cpu_freq()
+        if freq and freq.max:
+            info['cpu_freq_max_mhz'] = freq.max
+        info['ram_total_bytes'] = psutil.virtual_memory().total
+    except Exception:
+        pass
+    return info
+
+
+def _fmt(value):
+    """Render a report value; missing values become 'not available'."""
+    if value is None or value == '':
+        return 'not available'
+    if value is True:
+        return 'true'
+    if value is False:
+        return 'false'
+    return str(value)
+
+
+def _fmt_seconds(value):
+    if value is None:
+        return 'not available'
+    try:
+        return f"{float(value):.3f}"
+    except (TypeError, ValueError):
+        return 'not available'
+
+
+def _fmt_bytes(value):
+    if value is None:
+        return 'not available'
+    try:
+        return f"{int(value)} bytes ({int(value) / (1024 * 1024):.1f} MB)"
+    except (TypeError, ValueError):
+        return 'not available'
+
+
+def _environment_section_lines(env):
+    env = env or {}
+    lines = []
+    lines.append("--- Section 1: Environment ---")
+    lines.append(f"Timestamp: {_fmt(env.get('timestamp'))}")
+    lines.append(f"Plugin version: {_fmt(env.get('plugin_version'))}")
+    lines.append(f"QGIS version: {_fmt(env.get('qgis_version'))}")
+    lines.append(f"QGIS LTR target: {_fmt(env.get('qgis_ltr_target'))}")
+    lines.append("Dependencies (resolved):")
+    resolved = env.get('dependencies_resolved') or {}
+    for pkg in PINNED_DEPENDENCIES:
+        lines.append(f"    {pkg}: {_fmt(resolved.get(pkg))}")
+    lines.append("Dependencies (pinned):")
+    pinned = env.get('dependencies_pinned') or PINNED_DEPENDENCIES
+    for pkg, ver in pinned.items():
+        lines.append(f"    {pkg}: {_fmt(ver)}")
+    lines.append(f"Environment matches pin: {_fmt(env.get('environment_matches_pin'))}")
+    lines.append(f"Operating system: {_fmt(env.get('os'))}")
+    lines.append(f"Python version: {_fmt(env.get('python_version'))}")
+    lines.append(f"Processor: {_fmt(env.get('processor'))}")
+    lines.append(f"CPU cores (physical): {_fmt(env.get('cpu_cores_physical'))}")
+    lines.append(f"CPU cores (logical): {_fmt(env.get('cpu_cores_logical'))}")
+    lines.append(f"CPU nominal frequency (MHz): {_fmt(env.get('cpu_freq_max_mhz'))}")
+    lines.append(f"Total system RAM: {_fmt_bytes(env.get('ram_total_bytes'))}")
+    return lines
+
+
+def _parameters_section_lines(parameters):
+    parameters = parameters or {}
+    lines = []
+    lines.append(f"--- Section 3: Parameters ({len(parameters)} UI parameters) ---")
+    for key in sorted(parameters):
+        lines.append(f"{key} = {_fmt(parameters[key])}")
+    return lines
+
+
+def _performance_section_lines(perf, section_title="--- Section 5: Performance ---"):
+    perf = perf or {}
+    lines = []
+    lines.append(section_title)
+    lines.append(f"Wall time (s): {_fmt_seconds(perf.get('wall_time'))}")
+    lines.append(f"Phase join_stats (s): {_fmt_seconds(perf.get('t_join_stats'))}")
+    lines.append(f"Phase join (s): {_fmt_seconds(perf.get('t_join'))}")
+    lines.append(f"Phase rendering (s): {_fmt_seconds(perf.get('t_rendering'))}")
+    lines.append(f"Phase export (s): {_fmt_seconds(perf.get('t_export'))}")
+    lines.append(f"Phase report (s): {_fmt_seconds(perf.get('t_report'))}")
+    lines.append(f"CPU peak, raw sum over cores (%): {_fmt(perf.get('cpu_percent_peak_raw'))}")
+    lines.append(f"CPU mean, raw sum over cores (%): {_fmt(perf.get('cpu_percent_mean_raw'))}")
+    lines.append(f"CPU peak, normalized over logical cores (%): {_fmt(perf.get('cpu_percent_peak_normalized'))}")
+    lines.append(f"CPU mean, normalized over logical cores (%): {_fmt(perf.get('cpu_percent_mean_normalized'))}")
+    lines.append(f"CPU logical cores used for normalization: {_fmt(perf.get('cpu_logical_cores'))}")
+    lines.append(f"Resource samples collected: {_fmt(perf.get('samples_count'))}")
+    lines.append(f"Resource sampling interval (s): {_fmt(perf.get('sampling_interval'))}")
+    lines.append(f"Process RSS at start: {_fmt_bytes(perf.get('rss_start'))}")
+    lines.append(f"Process RSS peak: {_fmt_bytes(perf.get('rss_peak'))}")
+    lines.append(f"Process RSS delta (peak - start): {_fmt_bytes(perf.get('rss_delta'))}")
+    output_sizes = perf.get('output_sizes') or {}
+    lines.append("Output file sizes:")
+    if output_sizes:
+        for name in sorted(output_sizes):
+            lines.append(f"    {name}: {_fmt_bytes(output_sizes[name])}")
+    else:
+        lines.append("    not available")
+    lines.append(f"Total output size: {_fmt_bytes(perf.get('output_total_bytes'))}")
+    lines.append(f"Total input size: {_fmt_bytes(perf.get('input_total_bytes'))}")
+    ratio = perf.get('output_input_ratio')
+    lines.append(f"Output/input size ratio: {_fmt(None if ratio is None else f'{ratio:.3f}')}")
+    return lines
+
+
+def build_run_report(metrics):
+    """Build the QDataMap_run_report.txt text from a metrics dictionary.
+
+    Pure text construction: no QGIS access, no filesystem access. Missing
+    values are always rendered as 'not available'.
+    """
+    metrics = metrics or {}
+    lines = []
+    lines.append("================================================================")
+    lines.append("QDataMap run report")
+    lines.append("================================================================")
+    lines.append("")
+    lines.extend(_environment_section_lines(metrics.get('environment')))
+    lines.append("")
+
+    inp = metrics.get('input') or {}
+    lines.append("--- Section 2: Input ---")
+    lines.append(f"Geospatial layer path: {_fmt(inp.get('shape_path'))}")
+    lines.append(f"Geospatial layer name: {_fmt(inp.get('shape_name'))}")
+    lines.append(f"Geospatial layer size: {_fmt_bytes(inp.get('shape_size'))}")
+    lines.append(f"Geospatial layer mtime: {_fmt(inp.get('shape_mtime'))}")
+    lines.append(f"CSV path: {_fmt(inp.get('csv_path'))}")
+    lines.append(f"CSV name: {_fmt(inp.get('csv_name'))}")
+    lines.append(f"CSV size: {_fmt_bytes(inp.get('csv_size'))}")
+    lines.append(f"CSV mtime: {_fmt(inp.get('csv_mtime'))}")
+    lines.append(f"CSV detected encoding: {_fmt(inp.get('csv_encoding'))}")
+    lines.append(f"CSV detected delimiter: {_fmt(inp.get('csv_delimiter'))}")
+    lines.append(f"Input layer CRS: {_fmt(inp.get('input_crs'))}")
+    lines.append(f"Project CRS applied: {_fmt(inp.get('project_crs'))}")
+    lines.append("")
+
+    lines.extend(_parameters_section_lines(metrics.get('parameters')))
+    lines.append("")
+
+    join = metrics.get('join') or {}
+    lines.append("--- Section 4: Join and output metrics ---")
+    lines.append(f"Geospatial features (total): {_fmt(join.get('shape_features_total'))}")
+    lines.append(f"Geospatial vertices (total): {_fmt(join.get('input_vertices_total'))}")
+    lines.append(f"CSV records (total): {_fmt(join.get('csv_records_total'))}")
+    lines.append(f"Geospatial features matched: {_fmt(join.get('shape_matched'))}")
+    lines.append(f"Geospatial features unmatched: {_fmt(join.get('shape_unmatched'))}")
+    lines.append(f"CSV records matched: {_fmt(join.get('csv_matched'))}")
+    lines.append(f"CSV records unmatched: {_fmt(join.get('csv_unmatched'))}")
+    lines.append(f"Output features after join: {_fmt(join.get('output_features'))}")
+    lines.append(f"Output vertices after join: {_fmt(join.get('output_vertices_total'))}")
+    lines.append(f"Duplicate geometries from multiple matches: {_fmt(join.get('duplicate_geometries'))}")
+    lines.append(f"Discard nonmatching records: {_fmt(join.get('discard_nonmatching'))}")
+    lines.append(f"Matched features with NULL mapped value: {_fmt(join.get('matched_null_values'))}")
+    lines.append(f"Matched features with zero mapped value: {_fmt(join.get('matched_zero_values'))}")
+    lines.append(f"Renderer classes produced: {_fmt(join.get('renderer_classes'))}")
+    lines.append("")
+
+    lines.extend(_performance_section_lines(metrics.get('performance')))
+    lines.append("")
+    return "\n".join(lines)
+
+
+# Column order of the per-file table in the batch report (Section 4).
+BATCH_TABLE_COLUMNS = [
+    'iteration', 'file_name', 'outcome', 'matched_features', 'unmatched_features',
+    'null_values', 'output_vertices', 'classes', 'wall_time_s', 't_join_s',
+    't_rendering_s', 't_export_s', 'rss_peak_bytes', 'cpu_mean_pct',
+    'cpu_peak_pct', 'output_size_bytes',
+]
+
+
+def build_batch_report(metrics):
+    """Build the QDataMap_batch_report.txt text from a metrics dictionary.
+
+    Pure text construction, same conventions as build_run_report(). The
+    per-file table is tab-separated so it can be imported into a spreadsheet
+    without manual reformatting.
+    """
+    metrics = metrics or {}
+    lines = []
+    lines.append("================================================================")
+    lines.append("QDataMap batch report")
+    lines.append("================================================================")
+    lines.append("")
+    lines.extend(_environment_section_lines(metrics.get('environment')))
+    lines.append("")
+
+    scope = metrics.get('scope') or {}
+    lines.append("--- Section 2: Batch scope ---")
+    lines.append(f"Input CSV folder: {_fmt(scope.get('csv_folder'))}")
+    lines.append(f"Output root folder: {_fmt(scope.get('output_root'))}")
+    lines.append(f"Geospatial layer: {_fmt(scope.get('shape_path'))}")
+    lines.append(f"CSV files found: {_fmt(scope.get('csv_found'))}")
+    lines.append(f"CSV files processed: {_fmt(scope.get('csv_processed'))}")
+    lines.append(f"CSV files succeeded: {_fmt(scope.get('csv_succeeded'))}")
+    lines.append(f"CSV files failed: {_fmt(scope.get('csv_failed'))}")
+    stopped = scope.get('stopped_by_user')
+    lines.append(f"Batch interrupted with Stop button: {_fmt(stopped)}")
+    if stopped:
+        lines.append(
+            f"Files completed before interruption: "
+            f"{_fmt(scope.get('csv_processed'))} of {_fmt(scope.get('csv_found'))}"
+        )
+    lines.append(f"CSV schema consistency validation: {_fmt(scope.get('schema_validation'))}")
+    nonconforming = scope.get('schema_nonconforming')
+    if nonconforming:
+        lines.append("Non-conforming files:")
+        for name in nonconforming:
+            lines.append(f"    {name}")
+    lines.append(f"Preliminary join statistics enabled: {_fmt(scope.get('prelim_stats_enabled'))}")
+    lines.append("")
+
+    lines.extend(_parameters_section_lines(metrics.get('parameters')))
+    lines.append("")
+
+    lines.append("--- Section 4: Per-file table (tab-separated) ---")
+    lines.append("\t".join(BATCH_TABLE_COLUMNS))
+    for row in metrics.get('per_file') or []:
+        cells = []
+        for col in BATCH_TABLE_COLUMNS:
+            value = row.get(col)
+            if col in ('wall_time_s', 't_join_s', 't_rendering_s', 't_export_s'):
+                cells.append(_fmt_seconds(value))
+            else:
+                cells.append(_fmt(value))
+        lines.append("\t".join(cells))
+    lines.append("")
+
+    agg = metrics.get('aggregate') or {}
+    lines.append("--- Section 5: Aggregate performance ---")
+    lines.append(f"Batch wall time (s): {_fmt_seconds(agg.get('batch_wall_time'))}")
+    lines.append(f"Throughput (maps/minute): {_fmt(agg.get('throughput_maps_per_minute'))}")
+    lines.append(f"Time per map, mean (s): {_fmt_seconds(agg.get('map_time_mean'))}")
+    lines.append(f"Time per map, median (s): {_fmt_seconds(agg.get('map_time_median'))}")
+    lines.append(f"Time per map, min (s): {_fmt_seconds(agg.get('map_time_min'))}")
+    lines.append(f"Time per map, max (s): {_fmt_seconds(agg.get('map_time_max'))}")
+    lines.append(f"Time per map, standard deviation (s): {_fmt_seconds(agg.get('map_time_std'))}")
+    lines.append(f"Mean phase time, join (s): {_fmt_seconds(agg.get('phase_join_mean'))}")
+    lines.append(f"Mean phase time, rendering (s): {_fmt_seconds(agg.get('phase_rendering_mean'))}")
+    lines.append(f"Mean phase time, export (s): {_fmt_seconds(agg.get('phase_export_mean'))}")
+    lines.append(f"CPU mean over the whole batch, raw (%): {_fmt(agg.get('cpu_percent_mean_raw'))}")
+    lines.append(f"CPU peak over the whole batch, raw (%): {_fmt(agg.get('cpu_percent_peak_raw'))}")
+    lines.append(f"CPU mean over the whole batch, normalized (%): {_fmt(agg.get('cpu_percent_mean_normalized'))}")
+    lines.append(f"CPU peak over the whole batch, normalized (%): {_fmt(agg.get('cpu_percent_peak_normalized'))}")
+    lines.append(f"Resource samples collected: {_fmt(agg.get('samples_count'))}")
+    lines.append(f"Resource sampling interval (s): {_fmt(agg.get('sampling_interval'))}")
+    lines.append(f"Batch RSS initial: {_fmt_bytes(agg.get('rss_start'))}")
+    lines.append(f"Batch RSS peak: {_fmt_bytes(agg.get('rss_peak'))}")
+    lines.append(f"Batch RSS final: {_fmt_bytes(agg.get('rss_end'))}")
+    lines.append(f"Total input size: {_fmt_bytes(agg.get('input_total_bytes'))}")
+    lines.append(f"Total output size: {_fmt_bytes(agg.get('output_total_bytes'))}")
+    lines.append(f"Mean output size per map: {_fmt_bytes(agg.get('output_mean_bytes'))}")
+    lines.append("")
+    return "\n".join(lines)
 
 
 
@@ -81,6 +512,11 @@ class qdatamap_plugin:
 
 
         self.expression_context_generator = None
+
+        # Reporting state (Sections 6-7 of the v1.1 revision)
+        self.csv_schema_validation = None
+        self.last_run_metrics = None
+        self._join_stats_cache = None
 
 
     # noinspection PyMethodMayBeStatic
@@ -200,38 +636,62 @@ class qdatamap_plugin:
 
 
     def check_package(self, package_name, import_name=None):
-        """Check if a package is available without importing it."""
+        """Check that a package is present AND at the pinned version.
+
+        Returns a tuple (state, found_version, expected_version) where state is
+        one of 'ok', 'missing', 'mismatch'. A package installed in a
+        non-standard way (find_spec succeeds but metadata is unreadable) is
+        reported as 'mismatch' with found_version 'unknown', never as a crash.
+        """
         if import_name is None:
             import_name = package_name
 
+        expected = PINNED_DEPENDENCIES.get(package_name)
+
         # Use find_spec for fast checking without actually importing
         spec = importlib.util.find_spec(import_name)
-        return spec is not None
-    
+        if spec is None:
+            return ('missing', None, expected)
 
-    def install_package(self, package_name):
-        """Install a Python package in the QGIS environment."""
         try:
-            QgsMessageLog.logMessage(f"Installing {package_name}...", "QDataMap", Qgis.Info)
+            found = importlib.metadata.version(package_name)
+        except importlib.metadata.PackageNotFoundError:
+            return ('mismatch', 'unknown', expected)
+
+        if found == expected:
+            return ('ok', found, expected)
+        return ('mismatch', found, expected)
+
+
+    def install_package(self, package_name, upgrade=False):
+        """Install a Python package at its pinned version in the QGIS environment."""
+        try:
+            version_spec = f"{package_name}=={PINNED_DEPENDENCIES[package_name]}"
+            QgsMessageLog.logMessage(f"Installing {version_spec}...", "QDataMap", Qgis.Info)
 
             import os
             python_exe = os.path.join(sys.exec_prefix, 'python.exe')
             if not os.path.isfile(python_exe):
                 python_exe = sys.executable  # fallback for non-Windows
+            pip_args = [python_exe, '-m', 'pip', 'install']
+            if upgrade:
+                # pip does not replace an already-present version without --upgrade
+                pip_args.append('--upgrade')
+            pip_args.append(version_spec)
             result = subprocess.run(
-                [python_exe, '-m', 'pip', 'install', package_name],
+                pip_args,
                 capture_output=True,
                 text=True,
-                timeout=120
+                timeout=300
             )
 
             if result.returncode == 0:
-                QgsMessageLog.logMessage(f"Successfully installed {package_name}", "QDataMap", Qgis.Success)
-                self.iface.messageBar().pushMessage(f"Successfully installed {package_name}", level=Qgis.Success, duration=3)
+                QgsMessageLog.logMessage(f"Successfully installed {version_spec}", "QDataMap", Qgis.Success)
+                self.iface.messageBar().pushMessage(f"Successfully installed {version_spec}", level=Qgis.Success, duration=3)
                 return True
             else:
-                QgsMessageLog.logMessage(f"Failed to install {package_name}: {result.stderr}", "QDataMap", Qgis.Critical)
-                self.iface.messageBar().pushMessage(f"Failed to install {package_name}: {result.stderr}", level=Qgis.Critical, duration=5)
+                QgsMessageLog.logMessage(f"Failed to install {version_spec}: {result.stderr}", "QDataMap", Qgis.Critical)
+                self.iface.messageBar().pushMessage(f"Failed to install {version_spec}: {result.stderr}", level=Qgis.Critical, duration=5)
                 return False
 
         except Exception as e:
@@ -241,58 +701,534 @@ class qdatamap_plugin:
 
 
 
-    def check_and_install_dependencies(self):
-        """
-        Check and install required Python packages.
+    def resolved_dependency_versions(self):
+        """Return the dependency versions actually importable right now.
 
-        Returns:
-            bool: True if all dependencies are available, False otherwise
+        Unreadable metadata is reported as 'unknown', absence as 'not installed'.
         """
-        required_packages = {
-            'pandas': 'pandas',
-            'chardet': 'chardet',
-            'matplotlib': 'matplotlib',
-            'seaborn': 'seaborn',
+        resolved = {}
+        for pkg in PINNED_DEPENDENCIES:
+            try:
+                resolved[pkg] = importlib.metadata.version(pkg)
+            except importlib.metadata.PackageNotFoundError:
+                if importlib.util.find_spec(pkg) is not None:
+                    resolved[pkg] = 'unknown'
+                else:
+                    resolved[pkg] = 'not installed'
+            except Exception:
+                resolved[pkg] = 'unknown'
+        return resolved
+
+
+    def environment_matches_pin(self):
+        """True when every resolved dependency version equals its pin."""
+        resolved = self.resolved_dependency_versions()
+        return all(resolved.get(pkg) == pin for pkg, pin in PINNED_DEPENDENCIES.items())
+
+
+    def record_environment_metadata(self):
+        """Write the resolved environment into the current QGIS project.
+
+        Entries are written with QgsProject.writeEntry() under the "QDataMap"
+        scope so they are serialized into every generated .qgz. Must never
+        propagate exceptions: in batch mode a failure here would stop the
+        whole series.
+        """
+        try:
+            resolved = self.resolved_dependency_versions()
+            matches = all(resolved.get(pkg) == pin
+                          for pkg, pin in PINNED_DEPENDENCIES.items())
+            project = QgsProject.instance()
+            project.writeEntry("QDataMap", "plugin_version", QDATAMAP_VERSION)
+            project.writeEntry("QDataMap", "qgis_version", Qgis.QGIS_VERSION)
+            project.writeEntry("QDataMap", "qgis_ltr_target", QGIS_LTR_TARGET)
+            project.writeEntry("QDataMap", "dependencies", json.dumps(resolved, sort_keys=True))
+            project.writeEntry("QDataMap", "dependencies_pinned", json.dumps(PINNED_DEPENDENCIES, sort_keys=True))
+            project.writeEntry("QDataMap", "environment_matches_pin", "true" if matches else "false")
+        except Exception as e:
+            try:
+                QgsMessageLog.logMessage(f"Failed to record environment metadata: {e}", "QDataMap", Qgis.Warning)
+            except Exception:
+                pass
+
+
+    def collect_ui_configuration(self):
+        """Dump every value-bearing UI widget as {objectName: value}.
+
+        The widget list is derived from qdatamap_dialog_base.ui itself (the
+        dialog ships with the plugin and is loaded, not compiled), so the dump
+        stays in sync with the interface. Fonts, color ramps and symbols are
+        reduced to a synthetic representation. A widget whose value cannot be
+        read is reported as None, never as an exception.
+        """
+        import xml.etree.ElementTree as ET
+
+        config = {}
+        try:
+            ui_path = os.path.join(self.plugin_dir, 'qdatamap_dialog_base.ui')
+            root = ET.parse(ui_path).getroot()
+        except Exception as e:
+            try:
+                QgsMessageLog.logMessage(f"Failed to parse dialog .ui file: {e}", "QDataMap", Qgis.Warning)
+            except Exception:
+                pass
+            return config
+
+        for node in root.iter('widget'):
+            widget_class = node.get('class')
+            widget_name = node.get('name')
+            if widget_class not in VALUE_WIDGET_CLASSES:
+                continue
+            try:
+                widget = getattr(self.dlg, widget_name, None)
+                config[widget_name] = self._extract_widget_value(widget_class, widget)
+            except Exception:
+                config[widget_name] = None
+        return config
+
+
+    def _extract_widget_value(self, widget_class, widget):
+        """Extract a report-friendly value from a UI widget by its class."""
+        if widget is None:
+            return None
+        if widget_class == 'QCheckBox':
+            return widget.isChecked()
+        if widget_class == 'QgsFieldComboBox':
+            return widget.currentField()
+        if widget_class == 'QComboBox':
+            return widget.currentText()
+        if widget_class in ('QSpinBox', 'QDoubleSpinBox'):
+            return widget.value()
+        if widget_class == 'QLineEdit':
+            return widget.text()
+        if widget_class == 'QPlainTextEdit':
+            return widget.toPlainText()
+        if widget_class == 'QgsFieldExpressionWidget':
+            return widget.expression()
+        if widget_class == 'QgsFontButton':
+            font = widget.currentFont()
+            return f"{font.family()}, {font.pointSize()} pt"
+        if widget_class == 'QgsColorButton':
+            return widget.color().name()
+        if widget_class == 'QgsColorRampButton':
+            ramp_name = widget.colorRampName()
+            return ramp_name if ramp_name else 'custom color ramp'
+        if widget_class == 'QgsProjectionSelectionWidget':
+            crs = widget.crs()
+            authid = crs.authid()
+            return authid if authid else None
+        if widget_class == 'QgsSymbolButton':
+            symbol = widget.symbol()
+            if symbol is None:
+                return None
+            try:
+                return f"{type(symbol).__name__}, color {symbol.color().name()}"
+            except Exception:
+                return type(symbol).__name__
+        return None
+
+
+    def compute_join_stats(self, input_1_path, input_1_field, input_2_path, input_2_field):
+        """Compute join diagnostics with no user interaction.
+
+        Pure calculation counterpart of preliminary_join_stats(): returns all
+        Section 4 metrics as a dictionary. Invoked in both single and batch
+        mode, regardless of whether the user enabled the preliminary
+        statistics dialog. The result is cached so that a run preceded by the
+        interactive dialog does not compute the same numbers twice.
+        """
+        import chardet
+
+        # Load shapefile (input_1) with ogr provider
+        input_1_layer = QgsVectorLayer(input_1_path, "input1", "ogr")
+
+        # Load CSV (input_2) with proper encoding and delimiter detection
+        csv_name = os.path.basename(input_2_path)
+
+        # Detect file encoding
+        with open(input_2_path, 'rb') as file:
+            rawdata = file.read()
+            encoding = chardet.detect(rawdata)['encoding']
+
+        # Detect field delimiter
+        with open(input_2_path, 'r', newline='', encoding=encoding) as f:
+            sample = f.read(10000)
+            dialect = csv.Sniffer().sniff(sample)
+            delimiter = dialect.delimiter
+
+        # Load CSV as delimited text layer
+        uri = f"file:///{input_2_path}?delimiter={delimiter}"
+        input_2_layer = QgsVectorLayer(uri, csv_name, 'delimitedtext')
+
+        # Extract join field values from geospatial layer; vertices are
+        # counted in the same pass (geometric complexity metric)
+        input1_keys = []
+        input1_vertex_count = 0
+        for f in input_1_layer.getFeatures():
+            input1_keys.append(f[input_1_field])
+            try:
+                geom = f.geometry()
+                if geom is not None and not geom.isNull():
+                    input1_vertex_count += geom.constGet().nCoordinates()
+            except Exception:
+                pass
+        input1_key_set = set(input1_keys)
+
+        # Build frequency dictionary for tabular dataset join field
+        input2_keys = []
+        input2_freq = {}
+        for f in input_2_layer.getFeatures():
+
+            key = f[input_2_field]
+            input2_keys.append(key)
+
+            if key in input2_freq:
+                input2_freq[key] += 1
+            else:
+                input2_freq[key] = 1
+
+        # Compute intersection of join field values
+        matched_keys = input1_key_set & set(input2_freq.keys())
+
+        # Count unique matched features in geospatial layer
+        matched_unique_input1 = sum(1 for k in input1_keys if k in matched_keys)
+
+        # Calculate total output features after join operation
+        total_matches = sum(input2_freq[k] for k in matched_keys)
+
+        # Quantify geometry duplication
+        duplicate_geometries = total_matches - matched_unique_input1
+
+        # Calculate unmatched feature counts
+        input1_count = len(input1_keys)
+        input2_count = len(input2_keys)
+
+        unmatched_input1 = input1_count - matched_unique_input1
+        matched_input2 = sum(input2_freq[k] for k in matched_keys)
+        unmatched_input2 = input2_count - matched_input2
+
+        stats = {
+            'input1_count': input1_count,
+            'input2_count': input2_count,
+            'matched_unique_input1': matched_unique_input1,
+            'unmatched_input1': unmatched_input1,
+            'matched_input2': matched_input2,
+            'unmatched_input2': unmatched_input2,
+            'total_matches': total_matches,
+            'duplicate_geometries': duplicate_geometries,
+            'input1_vertex_count': input1_vertex_count,
+            'csv_encoding': encoding,
+            'csv_delimiter': delimiter,
+        }
+        self._join_stats_cache = (
+            (input_1_path, input_1_field, input_2_path, input_2_field),
+            stats,
+        )
+        return stats
+
+
+    def compute_field_value_stats(self, layer, field_name):
+        """Count total, NULL and zero values of a field in the joined layer.
+
+        Independent of the chart checkbox so the run report always contains
+        these counts, chart enabled or not. Vertices of the joined layer are
+        counted in the same pass (they include duplicated geometries).
+        """
+        total_count = 0
+        null_count = 0
+        zero_count = 0
+        vertex_count = 0
+        for feature in layer.getFeatures():
+            value = feature[field_name]
+            total_count += 1
+            if value == NULL or value is None:
+                null_count += 1
+            else:
+                try:
+                    if float(value) == 0:
+                        zero_count += 1
+                except (TypeError, ValueError):
+                    pass
+            try:
+                geom = feature.geometry()
+                if geom is not None and not geom.isNull():
+                    vertex_count += geom.constGet().nCoordinates()
+            except Exception:
+                pass
+        return {
+            'total_count': total_count,
+            'null_count': null_count,
+            'zero_count': zero_count,
+            'vertex_count': vertex_count,
         }
 
-        # Identify missing packages
-        missing_packages = [pkg for pkg, imp in required_packages.items()
-                           if not self.check_package(pkg, imp)]
 
-        if not missing_packages:
+    def count_renderer_classes(self, layer):
+        """Number of classes actually produced by the layer renderer."""
+        try:
+            renderer = layer.renderer()
+            if isinstance(renderer, QgsGraduatedSymbolRenderer):
+                return len(renderer.ranges())
+            if isinstance(renderer, QgsCategorizedSymbolRenderer):
+                return len(renderer.categories())
+            if renderer is not None:
+                return len(renderer.legendSymbolItems())
+        except Exception:
+            pass
+        return None
+
+
+    def write_run_report(self, metrics, output_directory):
+        """Write QDataMap_run_report.txt; failures never block map production."""
+        try:
+            report_path = os.path.join(output_directory, 'QDataMap_run_report.txt')
+            with open(report_path, 'w', encoding='utf-8') as report_file:
+                report_file.write(build_run_report(metrics))
+            QgsMessageLog.logMessage(f"Run report written to {report_path}", "QDataMap", Qgis.Info)
+        except Exception as e:
+            try:
+                QgsMessageLog.logMessage(f"Failed to write run report: {e}", "QDataMap", Qgis.Warning)
+            except Exception:
+                pass
+
+
+    def write_batch_report(self, metrics, root_directory):
+        """Write QDataMap_batch_report.txt; failures never block the batch."""
+        try:
+            report_path = os.path.join(root_directory, 'QDataMap_batch_report.txt')
+            with open(report_path, 'w', encoding='utf-8') as report_file:
+                report_file.write(build_batch_report(metrics))
+            QgsMessageLog.logMessage(f"Batch report written to {report_path}", "QDataMap", Qgis.Info)
+        except Exception as e:
+            try:
+                QgsMessageLog.logMessage(f"Failed to write batch report: {e}", "QDataMap", Qgis.Warning)
+            except Exception:
+                pass
+
+
+    def _build_batch_row(self, iteration, file_name, run_error):
+        """One row of the batch report per-file table, from the last run metrics."""
+        row = {'iteration': iteration, 'file_name': file_name}
+        if run_error is not None:
+            row['outcome'] = 'failed'
+            return row
+        metrics = getattr(self, 'last_run_metrics', None)
+        if not metrics:
+            row['outcome'] = None
+            return row
+        join = metrics.get('join') or {}
+        perf = metrics.get('performance') or {}
+        row['outcome'] = metrics.get('outcome')
+        row['matched_features'] = join.get('shape_matched')
+        row['unmatched_features'] = join.get('shape_unmatched')
+        row['null_values'] = join.get('matched_null_values')
+        row['output_vertices'] = join.get('output_vertices_total')
+        row['classes'] = join.get('renderer_classes')
+        row['wall_time_s'] = perf.get('wall_time')
+        row['t_join_s'] = perf.get('t_join')
+        row['t_rendering_s'] = perf.get('t_rendering')
+        row['t_export_s'] = perf.get('t_export')
+        row['rss_peak_bytes'] = perf.get('rss_peak')
+        row['cpu_mean_pct'] = perf.get('cpu_percent_mean_raw')
+        row['cpu_peak_pct'] = perf.get('cpu_percent_peak_raw')
+        row['output_size_bytes'] = perf.get('output_total_bytes')
+        return row
+
+
+    def _write_batch_summary(self, batch_root_directory, csv_folder_path, input_shape,
+                             total_csv, iteration_count, stopped, run_prelim_stats,
+                             per_file_records, batch_elapsed, batch_monitor_metrics,
+                             csv_files):
+        """Assemble the batch metrics and write the batch report to the root folder."""
+        import statistics
+
+        schema_validation = None
+        schema_nonconforming = None
+        validation = getattr(self, 'csv_schema_validation', None)
+        if validation is not None:
+            schema_validation = 'passed' if validation.get('consistent') else 'failed'
+            schema_nonconforming = validation.get('nonconforming') or None
+
+        aggregate = dict(batch_monitor_metrics or {})
+        aggregate['batch_wall_time'] = batch_elapsed
+        if batch_elapsed and iteration_count:
+            aggregate['throughput_maps_per_minute'] = round(iteration_count / (batch_elapsed / 60.0), 2)
+
+        wall_times = [r.get('wall_time_s') for r in per_file_records
+                      if isinstance(r.get('wall_time_s'), (int, float))]
+        if wall_times:
+            aggregate['map_time_mean'] = statistics.mean(wall_times)
+            aggregate['map_time_median'] = statistics.median(wall_times)
+            aggregate['map_time_min'] = min(wall_times)
+            aggregate['map_time_max'] = max(wall_times)
+            aggregate['map_time_std'] = statistics.stdev(wall_times) if len(wall_times) > 1 else 0.0
+
+        for phase_name, column in (('join', 't_join_s'), ('rendering', 't_rendering_s'),
+                                   ('export', 't_export_s')):
+            values = [r.get(column) for r in per_file_records
+                      if isinstance(r.get(column), (int, float))]
+            if values:
+                aggregate[f'phase_{phase_name}_mean'] = statistics.mean(values)
+
+        output_sizes = [r.get('output_size_bytes') for r in per_file_records
+                        if isinstance(r.get('output_size_bytes'), (int, float))]
+        if output_sizes:
+            aggregate['output_total_bytes'] = int(sum(output_sizes))
+            aggregate['output_mean_bytes'] = int(statistics.mean(output_sizes))
+
+        input_total = 0
+        try:
+            input_total += os.path.getsize(input_shape)
+        except OSError:
+            pass
+        for name in csv_files:
+            try:
+                input_total += os.path.getsize(os.path.join(csv_folder_path, name))
+            except OSError:
+                pass
+        aggregate['input_total_bytes'] = input_total if input_total else None
+
+        metrics = {
+            'environment': collect_environment_info(
+                self.resolved_dependency_versions(), self.environment_matches_pin()),
+            'scope': {
+                'csv_folder': csv_folder_path,
+                'output_root': batch_root_directory,
+                'shape_path': input_shape,
+                'csv_found': total_csv,
+                'csv_processed': iteration_count,
+                'csv_succeeded': self.csv_count_success,
+                'csv_failed': self.csv_count_failed,
+                'stopped_by_user': bool(stopped),
+                'schema_validation': schema_validation,
+                'schema_nonconforming': schema_nonconforming,
+                'prelim_stats_enabled': run_prelim_stats,
+            },
+            'parameters': self.collect_ui_configuration(),
+            'per_file': per_file_records,
+            'aggregate': aggregate,
+        }
+        self.write_batch_report(metrics, batch_root_directory)
+
+
+    def check_and_install_dependencies(self):
+        """
+        Check that required Python packages are present at the pinned versions.
+
+        No installation ever happens without an explicit user confirmation:
+        missing packages and version mismatches each raise a confirmation
+        dialog before pip is invoked.
+
+        Returns:
+            bool: True if the plugin may proceed, False otherwise
+        """
+        required_packages = {pkg: pkg for pkg in PINNED_DEPENDENCIES}
+
+        # Classify each dependency: 'ok', 'missing' or 'mismatch'
+        package_status = {pkg: self.check_package(pkg, imp)
+                          for pkg, imp in required_packages.items()}
+
+        missing_packages = [pkg for pkg, (state, _, _) in package_status.items()
+                            if state == 'missing']
+        mismatch_packages = [pkg for pkg, (state, _, _) in package_status.items()
+                             if state == 'mismatch']
+
+        pinned_specs = [f"{pkg}=={ver}" for pkg, ver in PINNED_DEPENDENCIES.items()]
+
+        if not missing_packages and not mismatch_packages:
             return True
 
-        # Prompt user to install missing packages
-        reply = QMessageBox.question(
-            None, "Missing Dependencies",
-            f"The following packages are required but not installed:\n\n"
-            f"{', '.join(missing_packages)}\n\n"
-            f"Do you want to install them automatically?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes
-        )
+        if missing_packages:
+            missing_specs = [f"{pkg}=={PINNED_DEPENDENCIES[pkg]}" for pkg in missing_packages]
 
-        if reply != QMessageBox.Yes:
-            QMessageBox.warning(
-                None, "Installation Cancelled",
-                f"The plugin requires these packages to work:\n"
-                f"{', '.join(missing_packages)}\n\n"
-                f"Please install them manually using the QGIS Python console:\n"
-                f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(p) for p in missing_packages)}])"
+            # Prompt user to install missing packages
+            reply = QMessageBox.question(
+                None, "Missing Dependencies",
+                f"The following packages are required but not installed:\n\n"
+                f"{', '.join(missing_specs)}\n\n"
+                f"Do you want to install them automatically?",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes
             )
-            return False
 
-        # Install missing packages
-        failed_packages = [pkg for pkg in missing_packages
-                          if not self.install_package(pkg)]
+            if reply != QMessageBox.Yes:
+                QMessageBox.warning(
+                    None, "Installation Cancelled",
+                    f"The plugin requires these packages to work:\n"
+                    f"{', '.join(pinned_specs)}\n\n"
+                    f"Please install them manually using the QGIS Python console:\n"
+                    f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(s) for s in pinned_specs)}])"
+                )
+                return False
 
-        if failed_packages:
-            QMessageBox.critical(
-                None, "Installation Failed",
-                f"Failed to install: {', '.join(failed_packages)}\n\n"
-                f"Please install them manually using the QGIS Python console:\n"
-                f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(p) for p in failed_packages)}])"
+            # Install missing packages at their pinned versions
+            failed_packages = [pkg for pkg in missing_packages
+                              if not self.install_package(pkg)]
+
+            if failed_packages:
+                failed_specs = [f"{pkg}=={PINNED_DEPENDENCIES[pkg]}" for pkg in failed_packages]
+                QMessageBox.critical(
+                    None, "Installation Failed",
+                    f"Failed to install: {', '.join(failed_specs)}\n\n"
+                    f"Please install them manually using the QGIS Python console:\n"
+                    f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(s) for s in failed_specs)}])"
+                )
+                return False
+
+        if mismatch_packages:
+            mismatch_lines = [
+                f"{pkg}: found {package_status[pkg][1]}, expected {package_status[pkg][2]}"
+                for pkg in mismatch_packages
+            ]
+
+            mismatch_box = QMessageBox()
+            mismatch_box.setWindowTitle("Dependency Version Mismatch")
+            mismatch_box.setIcon(QMessageBox.Warning)
+            mismatch_box.setText(
+                "The following packages are installed at a version different from "
+                "the one this release of QDataMap is validated against:\n\n"
+                + "\n".join(mismatch_lines) +
+                "\n\nInstalling the pinned versions is recommended: results obtained "
+                "with different versions are not covered by the validated environment."
             )
-            return False
+            install_button = mismatch_box.addButton("Install pinned versions", QMessageBox.AcceptRole)
+            continue_button = mismatch_box.addButton("Continue anyway", QMessageBox.DestructiveRole)
+            mismatch_box.addButton("Cancel", QMessageBox.RejectRole)
+            mismatch_box.setDefaultButton(install_button)
+
+            mismatch_box.exec_()
+            clicked = mismatch_box.clickedButton()
+
+            if clicked == install_button:
+                failed_packages = [pkg for pkg in mismatch_packages
+                                  if not self.install_package(pkg, upgrade=True)]
+                if failed_packages:
+                    failed_specs = [f"{pkg}=={PINNED_DEPENDENCIES[pkg]}" for pkg in failed_packages]
+                    QMessageBox.critical(
+                        None, "Installation Failed",
+                        f"Failed to install: {', '.join(failed_specs)}\n\n"
+                        f"Please install them manually using the QGIS Python console:\n"
+                        f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(s) for s in failed_specs)}])"
+                    )
+                    return False
+            elif clicked == continue_button:
+                # Proceed with the versions found; project metadata and reports
+                # will record the actually-resolved versions with
+                # environment_matches_pin = false.
+                QgsMessageLog.logMessage(
+                    "User chose to continue with non-pinned dependency versions: "
+                    + "; ".join(mismatch_lines),
+                    "QDataMap", Qgis.Warning
+                )
+                return True
+            else:
+                QMessageBox.warning(
+                    None, "Installation Cancelled",
+                    f"The plugin requires these packages to work:\n"
+                    f"{', '.join(pinned_specs)}\n\n"
+                    f"Please install them manually using the QGIS Python console:\n"
+                    f"import subprocess, sys, os; subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', {', '.join(repr(s) for s in pinned_specs)}])"
+                )
+                return False
 
         QMessageBox.information(
             None, "Installation Complete",
@@ -489,7 +1425,6 @@ class qdatamap_plugin:
             self.progress_message.layout().addWidget(self.stop_button)
 
         self.iface.messageBar().pushWidget(self.progress_message, Qgis.Info)
-        self.iface.mapCanvas().stopRendering()
         QApplication.processEvents()
 
     def update_progress(self, value, text=None):
@@ -501,10 +1436,9 @@ class qdatamap_plugin:
         if text:
             self.progress_message.setText(text)
 
-        # Cancel any ongoing render before processing events
-        self.iface.mapCanvas().stopRendering()
-
-        # Refresh UI without processing user input events
+        # Refresh UI without processing user input events. Canvas renders are
+        # deliberately left running: they are only unsafe at layer removal,
+        # which is fenced with waitWhileRendering() in the cleanup step
         QApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
 
     def close_progress_bar(self):
@@ -602,12 +1536,21 @@ class qdatamap_plugin:
             import time
             batch_start_time = time.time()
 
+            # The loop below overwrites output_directory at every iteration:
+            # capture the user-selected root once, for the batch report only
+            batch_root_directory = self.dlg.output_directory.text()
+
+            # Batch-wide resource monitor (aggregate metrics), in addition to
+            # the per-map monitor started inside perform_the_work()
+            batch_monitor = ResourceMonitor()
+            batch_monitor.start()
+            per_file_records = []
+
             iteration_count = 0
 
             for file_name in csv_files:
 
                 # Process pending UI events (including Stop button click) between iterations
-                self.iface.mapCanvas().stopRendering()
                 QApplication.processEvents()
                 
                 if self.stop_requested:
@@ -631,11 +1574,41 @@ class qdatamap_plugin:
                 if not os.path.exists(output_directory):
                     os.makedirs(output_directory)
 
-                # Execute workflow
-                self.perform_the_work(input_csv, input_shape, output_directory)
+                # Execute workflow; a failing file must not stop the series
+                run_error = None
+                try:
+                    self.perform_the_work(input_csv, input_shape, output_directory)
+                except Exception as e:
+                    run_error = e
+                    self.csv_count_failed = self.csv_count_failed + 1
+                    try:
+                        QgsMessageLog.logMessage(f"Batch iteration failed on {file_name}: {e}", "QDataMap", Qgis.Warning)
+                    except Exception:
+                        pass
+
+                per_file_records.append(self._build_batch_row(iteration_count, file_name, run_error))
 
             batch_elapsed = time.time() - batch_start_time
             print(f"[QDataMap] Batch completed ({iteration_count}/{total_csv} files): {batch_elapsed:.1f}s total")
+
+            # Batch summary report: written also when the batch was
+            # interrupted with the Stop button (partial data)
+            try:
+                batch_monitor_metrics = {}
+                try:
+                    batch_monitor_metrics = batch_monitor.stop()
+                except Exception:
+                    pass
+                self._write_batch_summary(
+                    batch_root_directory, csv_folder_path, input_shape,
+                    total_csv, iteration_count, self.stop_requested,
+                    run_prelim_stats, per_file_records, batch_elapsed,
+                    batch_monitor_metrics, csv_files)
+            except Exception as e:
+                try:
+                    QgsMessageLog.logMessage(f"Failed to build batch report: {e}", "QDataMap", Qgis.Warning)
+                except Exception:
+                    pass
 
             self.close_progress_bar()
             self.dlg.accept()
@@ -676,68 +1649,18 @@ class qdatamap_plugin:
 
     def preliminary_join_stats(self, input_1_path, input_1_field, input_2_path, input_2_field):
 
-        import chardet
-        import csv
+        # Numbers come from compute_join_stats(); dialogs, message texts,
+        # confirmation sequence and return values are unchanged from v1.0.
+        stats = self.compute_join_stats(input_1_path, input_1_field, input_2_path, input_2_field)
 
-        # Load shapefile (input_1) with ogr provider
-        input_1_layer = QgsVectorLayer(input_1_path, "input1", "ogr")
-
-        # Load CSV (input_2) with proper encoding and delimiter detection
-        csv_name = os.path.basename(input_2_path)
-
-        # Detect file encoding
-        with open(input_2_path, 'rb') as file:
-            rawdata = file.read()
-            encoding = chardet.detect(rawdata)['encoding']
-
-        # Detect field delimiter
-        with open(input_2_path, 'r', newline='', encoding=encoding) as f:
-            sample = f.read(10000)
-            dialect = csv.Sniffer().sniff(sample)
-            delimiter = dialect.delimiter
-
-        # Load CSV as delimited text layer
-        uri = f"file:///{input_2_path}?delimiter={delimiter}"
-        input_2_layer = QgsVectorLayer(uri, csv_name, 'delimitedtext')
-
-        # Extract join field values from geospatial layer
-        input1_keys = []
-        for f in input_1_layer.getFeatures():
-            input1_keys.append(f[input_1_field])
-        input1_key_set = set(input1_keys)
-
-        # Build frequency dictionary for tabular dataset join field
-        input2_keys = []
-        input2_freq = {}
-        for f in input_2_layer.getFeatures():
-
-            key = f[input_2_field]
-            input2_keys.append(key)
-
-            if key in input2_freq:
-                input2_freq[key] += 1
-            else:
-                input2_freq[key] = 1
-
-        # Compute intersection of join field values
-        matched_keys = input1_key_set & set(input2_freq.keys())
-
-        # Count unique matched features in geospatial layer
-        matched_unique_input1 = sum(1 for k in input1_keys if k in matched_keys)
-
-        # Calculate total output features after join operation
-        total_matches = sum(input2_freq[k] for k in matched_keys)
-
-        # Quantify geometry duplication
-        duplicate_geometries = total_matches - matched_unique_input1
-
-        # Calculate unmatched feature counts
-        input1_count = len(input1_keys)
-        input2_count = len(input2_keys)
-
-        unmatched_input1 = input1_count - matched_unique_input1
-        matched_input2 = sum(input2_freq[k] for k in matched_keys)
-        unmatched_input2 = input2_count - matched_input2
+        input1_count = stats['input1_count']
+        input2_count = stats['input2_count']
+        matched_unique_input1 = stats['matched_unique_input1']
+        unmatched_input1 = stats['unmatched_input1']
+        matched_input2 = stats['matched_input2']
+        unmatched_input2 = stats['unmatched_input2']
+        total_matches = stats['total_matches']
+        duplicate_geometries = stats['duplicate_geometries']
 
         report = f"""
         Join by Field Value Diagnostics
@@ -799,6 +1722,34 @@ class qdatamap_plugin:
         import time
 
         perform_start_time = time.time()
+
+        # Per-run resource monitor and phase instrumentation (additive only:
+        # measure, do not change behaviour)
+        run_monitor = ResourceMonitor()
+        run_monitor.start()
+        phase_times = {}
+        self.last_run_metrics = None
+
+        # Join statistics are always computed (Section 4 of the run report),
+        # independently of the preliminary statistics dialog choice; reuse the
+        # cached result when the dialog already computed them for these inputs.
+        join_stats_start = time.time()
+        join_stats = {}
+        try:
+            stats_key = (input_shape, self.dlg.join_field_geospatial.currentText(),
+                         input_csv, self.dlg.join_field_csv.currentText())
+            cached = getattr(self, '_join_stats_cache', None)
+            if cached is not None and cached[0] == stats_key:
+                join_stats = cached[1]
+            else:
+                join_stats = self.compute_join_stats(*stats_key)
+        except Exception as e:
+            try:
+                QgsMessageLog.logMessage(f"Failed to compute join statistics: {e}", "QDataMap", Qgis.Warning)
+            except Exception:
+                pass
+        phase_times['join_stats'] = time.time() - join_stats_start
+        join_phase_start = time.time()
 
         # Retrieve QGIS project instance
         project = QgsProject.instance()
@@ -869,6 +1820,9 @@ class qdatamap_plugin:
 
         layer_tree_root.insertLayer(dataviz_layer_rendering_position, layer)
         layer.triggerRepaint()
+
+        phase_times['join'] = time.time() - join_phase_start
+        rendering_phase_start = time.time()
 
 
         #############################################################
@@ -2399,8 +3353,13 @@ class qdatamap_plugin:
 
         project_name = csv_name.split('.')[0] + '_' + dataviz_field_name + '.qgz'
         qgis_project_path = os.path.join(output_directory, project_name)
+        # Environment entries must be written before serialization,
+        # otherwise they do not end up in the .qgz
+        self.record_environment_metadata()
         QgsProject.instance().write(qgis_project_path)
 
+        phase_times['rendering'] = time.time() - rendering_phase_start
+        export_phase_start = time.time()
 
 
         #############################################################
@@ -2445,7 +3404,137 @@ class qdatamap_plugin:
         QgsProject.instance().layerTreeRoot().setHasCustomLayerOrder(False)
         project_name = csv_name.split('.')[0] + '_' + dataviz_field_name + '.qgz'
         qgis_project_path = os.path.join(output_directory, project_name)
+        # Environment entries must be written before serialization,
+        # otherwise they do not end up in the .qgz
+        self.record_environment_metadata()
         QgsProject.instance().write(qgis_project_path)
+
+        phase_times['export'] = time.time() - export_phase_start
+
+
+        #############################################################
+        # Run report: assemble metrics and write QDataMap_run_report.txt.
+        # Report generation must never prevent map production: any failure is
+        # logged and the run continues.
+        report_phase_start = time.time()
+        try:
+            value_stats = {}
+            try:
+                value_stats = self.compute_field_value_stats(layer, dataviz_field_name)
+            except Exception:
+                pass
+            renderer_classes = self.count_renderer_classes(layer)
+
+            monitor_metrics = {}
+            try:
+                monitor_metrics = run_monitor.stop()
+            except Exception:
+                pass
+
+            def _file_info(path):
+                import datetime
+                try:
+                    file_stat = os.stat(path)
+                    mtime = datetime.datetime.fromtimestamp(
+                        file_stat.st_mtime).astimezone().isoformat(timespec='seconds')
+                    return file_stat.st_size, mtime
+                except OSError:
+                    return None, None
+
+            shape_size, shape_mtime = _file_info(input_shape)
+            csv_size, csv_mtime = _file_info(input_csv)
+
+            output_candidates = [output_layer_path, qgis_project_path, output_file_path]
+            # World file of image exports: first + last letter of the extension + 'w'
+            export_ext = output_file_extension.lower()
+            if export_ext != 'pdf':
+                export_base = os.path.splitext(output_file_path)[0]
+                output_candidates.append(f"{export_base}.{export_ext[0]}{export_ext[-1]}w")
+                output_candidates.append(export_base + '.wld')
+            output_sizes = {}
+            for candidate in output_candidates:
+                try:
+                    if candidate and os.path.isfile(candidate):
+                        output_sizes[os.path.basename(candidate)] = os.path.getsize(candidate)
+                except OSError:
+                    pass
+            output_total = sum(output_sizes.values()) if output_sizes else None
+            input_total = (shape_size or 0) + (csv_size or 0)
+            input_total = input_total if input_total > 0 else None
+            size_ratio = (output_total / input_total) if output_total and input_total else None
+
+            try:
+                input_crs = layer.crs().authid()
+            except Exception:
+                input_crs = None
+            try:
+                project_crs_id = QgsProject.instance().crs().authid()
+            except Exception:
+                project_crs_id = None
+
+            outcome = 'success' if export_result == QgsLayoutExporter.Success else 'export failed'
+
+            performance = dict(monitor_metrics)
+            performance['wall_time'] = time.time() - perform_start_time
+            performance['t_join_stats'] = phase_times.get('join_stats')
+            performance['t_join'] = phase_times.get('join')
+            performance['t_rendering'] = phase_times.get('rendering')
+            performance['t_export'] = phase_times.get('export')
+            performance['output_sizes'] = output_sizes
+            performance['output_total_bytes'] = output_total
+            performance['input_total_bytes'] = input_total
+            performance['output_input_ratio'] = size_ratio
+
+            metrics = {
+                'environment': collect_environment_info(
+                    self.resolved_dependency_versions(), self.environment_matches_pin()),
+                'input': {
+                    'shape_path': os.path.abspath(input_shape),
+                    'shape_name': os.path.basename(input_shape),
+                    'shape_size': shape_size,
+                    'shape_mtime': shape_mtime,
+                    'csv_path': os.path.abspath(input_csv),
+                    'csv_name': os.path.basename(input_csv),
+                    'csv_size': csv_size,
+                    'csv_mtime': csv_mtime,
+                    'csv_encoding': encoding,
+                    'csv_delimiter': delimiter,
+                    'input_crs': input_crs,
+                    'project_crs': project_crs_id,
+                },
+                'parameters': self.collect_ui_configuration(),
+                'join': {
+                    'shape_features_total': join_stats.get('input1_count'),
+                    'csv_records_total': join_stats.get('input2_count'),
+                    'shape_matched': join_stats.get('matched_unique_input1'),
+                    'shape_unmatched': join_stats.get('unmatched_input1'),
+                    'csv_matched': join_stats.get('matched_input2'),
+                    'csv_unmatched': join_stats.get('unmatched_input2'),
+                    'output_features': join_stats.get('total_matches'),
+                    'input_vertices_total': join_stats.get('input1_vertex_count'),
+                    'output_vertices_total': value_stats.get('vertex_count'),
+                    'duplicate_geometries': join_stats.get('duplicate_geometries'),
+                    'discard_nonmatching': self.dlg.discard_nonmatching_records.isChecked(),
+                    'matched_null_values': value_stats.get('null_count'),
+                    'matched_zero_values': value_stats.get('zero_count'),
+                    'renderer_classes': renderer_classes,
+                },
+                'performance': performance,
+                'outcome': outcome,
+            }
+
+            performance['t_report'] = time.time() - report_phase_start
+            self.write_run_report(metrics, output_directory)
+            self.last_run_metrics = metrics
+        except Exception as e:
+            try:
+                run_monitor.stop()
+            except Exception:
+                pass
+            try:
+                QgsMessageLog.logMessage(f"Failed to build run report: {e}", "QDataMap", Qgis.Warning)
+            except Exception:
+                pass
 
 
         #############################################################
@@ -2468,19 +3557,22 @@ class qdatamap_plugin:
         QgsProject.instance().layoutManager().removeLayout(layout)
         del layout
 
-        # Stop any ongoing canvas rendering
-        self.iface.mapCanvas().stopRendering()
+        # The canvas render job is asynchronous and holds references to the
+        # project layers: it must be fully finished (not merely cancelled)
+        # before removeAllMapLayers() frees them, otherwise its deferred
+        # destructor dereferences freed layers and crashes QGIS
+        canvas = self.iface.mapCanvas()
+        canvas.stopRendering()
+        canvas.waitWhileRendering()
         QApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
 
         # Clear project layers
         QgsProject.instance().removeAllMapLayers()
         QgsProject.instance().layerTreeRoot().clear()
-        self.iface.mapCanvas().refresh()
+        canvas.refresh()
 
         # Force garbage collection
         gc.collect()
-        self.iface.mapCanvas().stopRendering()
-        QApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
 
 
         perform_elapsed = time.time() - perform_start_time
@@ -3338,6 +4430,12 @@ class qdatamap_plugin:
                             files_to_amend_list.append(file_name)
                             all_match = False
 
+            # Record the validation outcome for the batch report (Section 2)
+            self.csv_schema_validation = {
+                'consistent': all_match,
+                'nonconforming': list(files_to_amend_list),
+            }
+
             if all_match is True:
                 # All files have consistent schema
                 self.dlg.join_field_csv.setAllowEmptyFieldName(False)
@@ -3404,7 +4502,7 @@ class qdatamap_plugin:
                 elif message_box.clickedButton() == custom_button_report:
                     # Generate validation report
                     report_path = os.path.join(folder_path, 'QDataMap_report.txt')
-                    with open(report_path, 'w') as file:
+                    with open(report_path, 'w', encoding='utf-8') as file:
                         file.write(f'The CSV files that have field names different from those in the file {first_file} are:\n\n')
                         for item in files_to_amend_list:
                             file.write(f'{item}\n')

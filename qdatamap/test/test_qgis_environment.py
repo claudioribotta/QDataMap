@@ -15,29 +15,33 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 
 import os
 import unittest
-from qgis.core import (
-    QgsProviderRegistry,
-    QgsCoordinateReferenceSystem,
-    QgsRasterLayer)
 
-from .utilities import get_qgis_app
-QGIS_APP = get_qgis_app()
+from .qgis_stubs import ensure_qgis_app, qgis_available
+
+QGIS_AVAILABLE = qgis_available()
+
+if QGIS_AVAILABLE:
+    QGIS_APP = ensure_qgis_app()
 
 
+@unittest.skipUnless(QGIS_AVAILABLE, 'QGIS environment required')
 class QGISTest(unittest.TestCase):
     """Test the QGIS Environment"""
 
     def test_qgis_environment(self):
-        """QGIS environment has the expected providers"""
+        """QGIS environment has the providers the plugin relies on."""
+        from qgis.core import QgsProviderRegistry
 
         r = QgsProviderRegistry.instance()
         self.assertIn('gdal', r.providerList())
         self.assertIn('ogr', r.providerList())
-        self.assertIn('postgres', r.providerList())
+        self.assertIn('delimitedtext', r.providerList())
 
     def test_projection(self):
         """Test that QGIS properly parses a wkt string.
         """
+        from qgis.core import QgsCoordinateReferenceSystem, QgsRasterLayer
+
         crs = QgsCoordinateReferenceSystem()
         wkt = (
             'GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",'
@@ -49,12 +53,14 @@ class QGISTest(unittest.TestCase):
         expected_auth_id = 'EPSG:4326'
         self.assertEqual(auth_id, expected_auth_id)
 
-        # now test for a loaded layer
+        # now test for a loaded layer; recent GDAL releases identify the
+        # fixture's WGS84 WKT as OGC:CRS84 (axis order variant of EPSG:4326)
         path = os.path.join(os.path.dirname(__file__), 'tenbytenraster.asc')
         title = 'TestRaster'
         layer = QgsRasterLayer(path, title)
         auth_id = layer.crs().authid()
-        self.assertEqual(auth_id, expected_auth_id)
+        self.assertIn(auth_id, ('EPSG:4326', 'OGC:CRS84'))
+
 
 if __name__ == '__main__':
     unittest.main()

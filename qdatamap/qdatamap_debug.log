@@ -1,0 +1,281 @@
+=== QDataMap Debug Log ===
+Started: 2026-02-08 15:59:35
+Log file: C:\Users/claud/AppData/Roaming/QGIS/QGIS3\profiles\default/python/plugins\qdatamap\qdatamap_debug.log
+============================================================
+
+[2026-02-08 15:59:38.851] 
+============================================================
+[2026-02-08 15:59:38.851] LOOP: Starting iteration 1 - Brassica oleracea.csv
+[2026-02-08 15:59:38.851] ============================================================
+[2026-02-08 15:59:38.852] LOOP: Running preliminary join stats...
+[2026-02-08 15:59:41.915] LOOP: Preliminary join stats OK
+[2026-02-08 15:59:41.915] LOOP: Calling perform_the_work...
+[2026-02-08 15:59:41.915] WORK: Entered perform_the_work function
+[2026-02-08 15:59:41.916] WORK: Imports completed
+[2026-02-08 15:59:41.916] WORK: Got project instance
+[2026-02-08 15:59:41.916] WORK: Project has 0 layers at start
+[2026-02-08 15:59:41.916] WORK: Skipping project.clear() - using cleaned project from previous iteration
+[2026-02-08 15:59:42.028] WORK: Starting CRS transformation
+[2026-02-08 15:59:42.029] WORK: Old CRS: <QgsCoordinateReferenceSystem: EPSG:4326>, New CRS: <QgsCoordinateReferenceSystem: EPSG:3035>
+[2026-02-08 15:59:42.041] WORK: Transform context configured
+[2026-02-08 15:59:42.068] WORK: CRS applied and layers reloaded
+[2026-02-08 15:59:42.069] WORK: Canvas adjusted and refreshed
+[2026-02-08 15:59:42.069] WORK: Starting ancillary layers section
+[2026-02-08 15:59:42.070] WORK: Layer tree root obtained, current children: [<QgsLayerTreeLayer: Brassica oleracea>]
+[2026-02-08 15:59:42.070] WORK: Layer A is checked, attempting to add...
+[2026-02-08 15:59:42.070] WORK: Layer A path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/GRID/SUPP_GRAT_LI.shp, name: SUPP_GRAT_LI
+[2026-02-08 15:59:42.070] WORK: Checking file exists: True
+[2026-02-08 15:59:42.071] WORK: Current project has 2 layers
+[2026-02-08 15:59:42.071] WORK: Existing layer names: ['Brassica oleracea', 'Brassica oleracea.csv']
+[2026-02-08 15:59:42.071] WORK: Creating QgsVectorLayer...
+[2026-02-08 15:59:42.076] WORK: Layer A created, isValid: True
+[2026-02-08 15:59:42.076] WORK: Adding Layer A to project (position 0)
+[2026-02-08 15:59:42.077] WORK: Layer A added to project (not in legend yet)
+[2026-02-08 15:59:42.078] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:42.078] WORK: Layer A symbol set
+[2026-02-08 15:59:42.080] WORK: Layer A inserted into layer tree at position 0
+[2026-02-08 15:59:42.080] WORK: Layer A fully configured
+[2026-02-08 15:59:42.081] WORK: Layer B is checked, attempting to add...
+[2026-02-08 15:59:42.081] WORK: Layer B path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/EU_NUTS/Global_ADMIN_0.gpkg, name: Global_ADMIN_0
+[2026-02-08 15:59:42.094] WORK: Layer B created, isValid: True
+[2026-02-08 15:59:42.094] WORK: Adding Layer B to project (position 2)
+[2026-02-08 15:59:42.095] WORK: Layer B added to project (not in legend yet)
+[2026-02-08 15:59:42.095] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:42.096] WORK: Layer B symbol set
+[2026-02-08 15:59:42.097] WORK: Layer B inserted into layer tree at position 2
+[2026-02-08 15:59:42.098] WORK: Layer B fully configured
+[2026-02-08 15:59:42.098] WORK: Layer C not checked, skipped
+[2026-02-08 15:59:42.098] WORK: All ancillary layers processed
+[2026-02-08 15:59:42.099] WORK: Starting layout creation
+[2026-02-08 15:59:42.101] WORK: Print layout created and initialized
+[2026-02-08 15:59:43.124] WORK: Saving QGIS project
+[2026-02-08 15:59:43.125] WORK: Project path: C:/Users/claud/OneDrive/Desktop/CREA/__test\Brassica oleracea\Brassica oleracea_PROD_AV.qgz
+[2026-02-08 15:59:43.170] WORK: Project saved successfully
+[2026-02-08 15:59:43.171] WORK: Starting cleanup...
+[2026-02-08 15:59:43.171] WORK: Deleting layer variables...
+[2026-02-08 15:59:43.171] WORK: Deleting layer_a: SUPP_GRAT_LI
+[2026-02-08 15:59:43.171] WORK: Deleting layer_b: Global_ADMIN_0
+[2026-02-08 15:59:43.171] WORK: Deleting main layer: Brassica oleracea
+[2026-02-08 15:59:43.171] WORK: Layer variables deleted
+[2026-02-08 15:59:43.172] WORK: Removing layout 'Brassica oleracea_PROD_AV' from layout manager
+[2026-02-08 15:59:43.173] WORK: Layout removed
+[2026-02-08 15:59:43.173] WORK: Removing all map layers
+[2026-02-08 15:59:43.179] WORK: All layers removed
+[2026-02-08 15:59:43.179] WORK: Clearing layer tree
+[2026-02-08 15:59:43.179] WORK: Layer tree cleared
+[2026-02-08 15:59:43.179] WORK: Running garbage collection (first pass)
+[2026-02-08 15:59:43.246] WORK: Garbage collection complete
+[2026-02-08 15:59:43.246] WORK: Processing Qt events (first pass)
+[2026-02-08 15:59:43.258] WORK: Second cleanup pass...
+[2026-02-08 15:59:43.316] WORK: Cleanup verification - remaining layers: 0
+[2026-02-08 15:59:43.317] WORK: Cleanup complete
+[2026-02-08 15:59:43.317] WORK: Exiting perform_the_work function
+[2026-02-08 15:59:43.317] LOOP: Iteration 1 completed
+
+[2026-02-08 15:59:43.318] 
+============================================================
+[2026-02-08 15:59:43.318] LOOP: Starting iteration 2 - Citrus limon.csv
+[2026-02-08 15:59:43.318] ============================================================
+[2026-02-08 15:59:43.318] LOOP: Running preliminary join stats...
+[2026-02-08 15:59:46.968] LOOP: Preliminary join stats OK
+[2026-02-08 15:59:46.968] LOOP: Calling perform_the_work...
+[2026-02-08 15:59:46.969] WORK: Entered perform_the_work function
+[2026-02-08 15:59:46.969] WORK: Imports completed
+[2026-02-08 15:59:46.969] WORK: Got project instance
+[2026-02-08 15:59:46.969] WORK: Project has 0 layers at start
+[2026-02-08 15:59:46.970] WORK: Skipping project.clear() - using cleaned project from previous iteration
+[2026-02-08 15:59:47.072] WORK: Starting CRS transformation
+[2026-02-08 15:59:47.072] WORK: Old CRS: <QgsCoordinateReferenceSystem: EPSG:3035>, New CRS: <QgsCoordinateReferenceSystem: EPSG:3035>
+[2026-02-08 15:59:47.074] WORK: Transform context configured
+[2026-02-08 15:59:47.079] WORK: CRS applied and layers reloaded
+[2026-02-08 15:59:47.079] WORK: Canvas adjusted and refreshed
+[2026-02-08 15:59:47.080] WORK: Starting ancillary layers section
+[2026-02-08 15:59:47.080] WORK: Layer tree root obtained, current children: [<QgsLayerTreeLayer: Citrus limon>]
+[2026-02-08 15:59:47.080] WORK: Layer A is checked, attempting to add...
+[2026-02-08 15:59:47.080] WORK: Layer A path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/GRID/SUPP_GRAT_LI.shp, name: SUPP_GRAT_LI
+[2026-02-08 15:59:47.081] WORK: Checking file exists: True
+[2026-02-08 15:59:47.081] WORK: Current project has 2 layers
+[2026-02-08 15:59:47.081] WORK: Existing layer names: ['Citrus limon.csv', 'Citrus limon']
+[2026-02-08 15:59:47.081] WORK: Creating QgsVectorLayer...
+[2026-02-08 15:59:47.085] WORK: Layer A created, isValid: True
+[2026-02-08 15:59:47.086] WORK: Adding Layer A to project (position 0)
+[2026-02-08 15:59:47.087] WORK: Layer A added to project (not in legend yet)
+[2026-02-08 15:59:47.087] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:47.087] WORK: Layer A symbol set
+[2026-02-08 15:59:47.089] WORK: Layer A inserted into layer tree at position 0
+[2026-02-08 15:59:47.089] WORK: Layer A fully configured
+[2026-02-08 15:59:47.090] WORK: Layer B is checked, attempting to add...
+[2026-02-08 15:59:47.090] WORK: Layer B path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/EU_NUTS/Global_ADMIN_0.gpkg, name: Global_ADMIN_0
+[2026-02-08 15:59:47.102] WORK: Layer B created, isValid: True
+[2026-02-08 15:59:47.102] WORK: Adding Layer B to project (position 2)
+[2026-02-08 15:59:47.103] WORK: Layer B added to project (not in legend yet)
+[2026-02-08 15:59:47.104] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:47.104] WORK: Layer B symbol set
+[2026-02-08 15:59:47.105] WORK: Layer B inserted into layer tree at position 2
+[2026-02-08 15:59:47.106] WORK: Layer B fully configured
+[2026-02-08 15:59:47.106] WORK: Layer C not checked, skipped
+[2026-02-08 15:59:47.106] WORK: All ancillary layers processed
+[2026-02-08 15:59:47.107] WORK: Starting layout creation
+[2026-02-08 15:59:47.109] WORK: Print layout created and initialized
+[2026-02-08 15:59:48.106] WORK: Saving QGIS project
+[2026-02-08 15:59:48.107] WORK: Project path: C:/Users/claud/OneDrive/Desktop/CREA/__test\Citrus limon\Citrus limon_PROD_AV.qgz
+[2026-02-08 15:59:48.152] WORK: Project saved successfully
+[2026-02-08 15:59:48.152] WORK: Starting cleanup...
+[2026-02-08 15:59:48.152] WORK: Deleting layer variables...
+[2026-02-08 15:59:48.153] WORK: Deleting layer_a: SUPP_GRAT_LI
+[2026-02-08 15:59:48.153] WORK: Deleting layer_b: Global_ADMIN_0
+[2026-02-08 15:59:48.153] WORK: Deleting main layer: Citrus limon
+[2026-02-08 15:59:48.154] WORK: Layer variables deleted
+[2026-02-08 15:59:48.154] WORK: Removing layout 'Citrus limon_PROD_AV' from layout manager
+[2026-02-08 15:59:48.155] WORK: Layout removed
+[2026-02-08 15:59:48.155] WORK: Removing all map layers
+[2026-02-08 15:59:48.161] WORK: All layers removed
+[2026-02-08 15:59:48.161] WORK: Clearing layer tree
+[2026-02-08 15:59:48.161] WORK: Layer tree cleared
+[2026-02-08 15:59:48.161] WORK: Running garbage collection (first pass)
+[2026-02-08 15:59:48.214] WORK: Garbage collection complete
+[2026-02-08 15:59:48.214] WORK: Processing Qt events (first pass)
+[2026-02-08 15:59:48.230] WORK: Second cleanup pass...
+[2026-02-08 15:59:48.290] WORK: Cleanup verification - remaining layers: 0
+[2026-02-08 15:59:48.290] WORK: Cleanup complete
+[2026-02-08 15:59:48.290] WORK: Exiting perform_the_work function
+[2026-02-08 15:59:48.291] LOOP: Iteration 2 completed
+
+[2026-02-08 15:59:48.291] 
+============================================================
+[2026-02-08 15:59:48.291] LOOP: Starting iteration 3 - Solanum lycopersicum.csv
+[2026-02-08 15:59:48.291] ============================================================
+[2026-02-08 15:59:48.292] LOOP: Running preliminary join stats...
+[2026-02-08 15:59:50.393] LOOP: Preliminary join stats OK
+[2026-02-08 15:59:50.393] LOOP: Calling perform_the_work...
+[2026-02-08 15:59:50.393] WORK: Entered perform_the_work function
+[2026-02-08 15:59:50.393] WORK: Imports completed
+[2026-02-08 15:59:50.393] WORK: Got project instance
+[2026-02-08 15:59:50.394] WORK: Project has 0 layers at start
+[2026-02-08 15:59:50.394] WORK: Skipping project.clear() - using cleaned project from previous iteration
+[2026-02-08 15:59:50.496] WORK: Starting CRS transformation
+[2026-02-08 15:59:50.497] WORK: Old CRS: <QgsCoordinateReferenceSystem: EPSG:3035>, New CRS: <QgsCoordinateReferenceSystem: EPSG:3035>
+[2026-02-08 15:59:50.498] WORK: Transform context configured
+[2026-02-08 15:59:50.503] WORK: CRS applied and layers reloaded
+[2026-02-08 15:59:50.504] WORK: Canvas adjusted and refreshed
+[2026-02-08 15:59:50.504] WORK: Starting ancillary layers section
+[2026-02-08 15:59:50.504] WORK: Layer tree root obtained, current children: [<QgsLayerTreeLayer: Solanum lycopersicum>]
+[2026-02-08 15:59:50.504] WORK: Layer A is checked, attempting to add...
+[2026-02-08 15:59:50.504] WORK: Layer A path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/GRID/SUPP_GRAT_LI.shp, name: SUPP_GRAT_LI
+[2026-02-08 15:59:50.505] WORK: Checking file exists: True
+[2026-02-08 15:59:50.505] WORK: Current project has 2 layers
+[2026-02-08 15:59:50.505] WORK: Existing layer names: ['Solanum lycopersicum', 'Solanum lycopersicum.csv']
+[2026-02-08 15:59:50.505] WORK: Creating QgsVectorLayer...
+[2026-02-08 15:59:50.509] WORK: Layer A created, isValid: True
+[2026-02-08 15:59:50.510] WORK: Adding Layer A to project (position 0)
+[2026-02-08 15:59:50.510] WORK: Layer A added to project (not in legend yet)
+[2026-02-08 15:59:50.511] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:50.511] WORK: Layer A symbol set
+[2026-02-08 15:59:50.512] WORK: Layer A inserted into layer tree at position 0
+[2026-02-08 15:59:50.513] WORK: Layer A fully configured
+[2026-02-08 15:59:50.513] WORK: Layer B is checked, attempting to add...
+[2026-02-08 15:59:50.513] WORK: Layer B path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/EU_NUTS/Global_ADMIN_0.gpkg, name: Global_ADMIN_0
+[2026-02-08 15:59:50.526] WORK: Layer B created, isValid: True
+[2026-02-08 15:59:50.526] WORK: Adding Layer B to project (position 2)
+[2026-02-08 15:59:50.527] WORK: Layer B added to project (not in legend yet)
+[2026-02-08 15:59:50.527] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:50.528] WORK: Layer B symbol set
+[2026-02-08 15:59:50.529] WORK: Layer B inserted into layer tree at position 2
+[2026-02-08 15:59:50.530] WORK: Layer B fully configured
+[2026-02-08 15:59:50.530] WORK: Layer C not checked, skipped
+[2026-02-08 15:59:50.530] WORK: All ancillary layers processed
+[2026-02-08 15:59:50.531] WORK: Starting layout creation
+[2026-02-08 15:59:50.533] WORK: Print layout created and initialized
+[2026-02-08 15:59:51.544] WORK: Saving QGIS project
+[2026-02-08 15:59:51.544] WORK: Project path: C:/Users/claud/OneDrive/Desktop/CREA/__test\Solanum lycopersicum\Solanum lycopersicum_PROD_AV.qgz
+[2026-02-08 15:59:51.594] WORK: Project saved successfully
+[2026-02-08 15:59:51.595] WORK: Starting cleanup...
+[2026-02-08 15:59:51.595] WORK: Deleting layer variables...
+[2026-02-08 15:59:51.595] WORK: Deleting layer_a: SUPP_GRAT_LI
+[2026-02-08 15:59:51.595] WORK: Deleting layer_b: Global_ADMIN_0
+[2026-02-08 15:59:51.596] WORK: Deleting main layer: Solanum lycopersicum
+[2026-02-08 15:59:51.596] WORK: Layer variables deleted
+[2026-02-08 15:59:51.596] WORK: Removing layout 'Solanum lycopersicum_PROD_AV' from layout manager
+[2026-02-08 15:59:51.597] WORK: Layout removed
+[2026-02-08 15:59:51.598] WORK: Removing all map layers
+[2026-02-08 15:59:51.603] WORK: All layers removed
+[2026-02-08 15:59:51.603] WORK: Clearing layer tree
+[2026-02-08 15:59:51.604] WORK: Layer tree cleared
+[2026-02-08 15:59:51.604] WORK: Running garbage collection (first pass)
+[2026-02-08 15:59:51.662] WORK: Garbage collection complete
+[2026-02-08 15:59:51.662] WORK: Processing Qt events (first pass)
+[2026-02-08 15:59:51.678] WORK: Second cleanup pass...
+[2026-02-08 15:59:51.734] WORK: Cleanup verification - remaining layers: 0
+[2026-02-08 15:59:51.735] WORK: Cleanup complete
+[2026-02-08 15:59:51.735] WORK: Exiting perform_the_work function
+[2026-02-08 15:59:51.735] LOOP: Iteration 3 completed
+
+[2026-02-08 15:59:51.736] 
+============================================================
+[2026-02-08 15:59:51.736] LOOP: Starting iteration 4 - Vitis vinifera.csv
+[2026-02-08 15:59:51.736] ============================================================
+[2026-02-08 15:59:51.736] LOOP: Running preliminary join stats...
+[2026-02-08 15:59:53.555] LOOP: Preliminary join stats OK
+[2026-02-08 15:59:53.555] LOOP: Calling perform_the_work...
+[2026-02-08 15:59:53.555] WORK: Entered perform_the_work function
+[2026-02-08 15:59:53.556] WORK: Imports completed
+[2026-02-08 15:59:53.556] WORK: Got project instance
+[2026-02-08 15:59:53.556] WORK: Project has 0 layers at start
+[2026-02-08 15:59:53.556] WORK: Skipping project.clear() - using cleaned project from previous iteration
+[2026-02-08 15:59:53.666] WORK: Starting CRS transformation
+[2026-02-08 15:59:53.666] WORK: Old CRS: <QgsCoordinateReferenceSystem: EPSG:3035>, New CRS: <QgsCoordinateReferenceSystem: EPSG:3035>
+[2026-02-08 15:59:53.667] WORK: Transform context configured
+[2026-02-08 15:59:53.672] WORK: CRS applied and layers reloaded
+[2026-02-08 15:59:53.672] WORK: Canvas adjusted and refreshed
+[2026-02-08 15:59:53.673] WORK: Starting ancillary layers section
+[2026-02-08 15:59:53.673] WORK: Layer tree root obtained, current children: [<QgsLayerTreeLayer: Vitis vinifera>]
+[2026-02-08 15:59:53.673] WORK: Layer A is checked, attempting to add...
+[2026-02-08 15:59:53.673] WORK: Layer A path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/GRID/SUPP_GRAT_LI.shp, name: SUPP_GRAT_LI
+[2026-02-08 15:59:53.674] WORK: Checking file exists: True
+[2026-02-08 15:59:53.674] WORK: Current project has 2 layers
+[2026-02-08 15:59:53.674] WORK: Existing layer names: ['Vitis vinifera.csv', 'Vitis vinifera']
+[2026-02-08 15:59:53.674] WORK: Creating QgsVectorLayer...
+[2026-02-08 15:59:53.679] WORK: Layer A created, isValid: True
+[2026-02-08 15:59:53.679] WORK: Adding Layer A to project (position 0)
+[2026-02-08 15:59:53.680] WORK: Layer A added to project (not in legend yet)
+[2026-02-08 15:59:53.680] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:53.680] WORK: Layer A symbol set
+[2026-02-08 15:59:53.682] WORK: Layer A inserted into layer tree at position 0
+[2026-02-08 15:59:53.682] WORK: Layer A fully configured
+[2026-02-08 15:59:53.682] WORK: Layer B is checked, attempting to add...
+[2026-02-08 15:59:53.683] WORK: Layer B path: C:/Users/claud/OneDrive/Desktop/CREA/__test/inputs/EU_NUTS/Global_ADMIN_0.gpkg, name: Global_ADMIN_0
+[2026-02-08 15:59:53.696] WORK: Layer B created, isValid: True
+[2026-02-08 15:59:53.696] WORK: Adding Layer B to project (position 2)
+[2026-02-08 15:59:53.697] WORK: Layer B added to project (not in legend yet)
+[2026-02-08 15:59:53.698] WORK: Cloning symbol from UI widget
+[2026-02-08 15:59:53.698] WORK: Layer B symbol set
+[2026-02-08 15:59:53.699] WORK: Layer B inserted into layer tree at position 2
+[2026-02-08 15:59:53.700] WORK: Layer B fully configured
+[2026-02-08 15:59:53.700] WORK: Layer C not checked, skipped
+[2026-02-08 15:59:53.700] WORK: All ancillary layers processed
+[2026-02-08 15:59:53.701] WORK: Starting layout creation
+[2026-02-08 15:59:53.704] WORK: Print layout created and initialized
+[2026-02-08 15:59:54.713] WORK: Saving QGIS project
+[2026-02-08 15:59:54.714] WORK: Project path: C:/Users/claud/OneDrive/Desktop/CREA/__test\Vitis vinifera\Vitis vinifera_PROD_AV.qgz
+[2026-02-08 15:59:54.759] WORK: Project saved successfully
+[2026-02-08 15:59:54.759] WORK: Starting cleanup...
+[2026-02-08 15:59:54.760] WORK: Deleting layer variables...
+[2026-02-08 15:59:54.760] WORK: Deleting layer_a: SUPP_GRAT_LI
+[2026-02-08 15:59:54.760] WORK: Deleting layer_b: Global_ADMIN_0
+[2026-02-08 15:59:54.760] WORK: Deleting main layer: Vitis vinifera
+[2026-02-08 15:59:54.760] WORK: Layer variables deleted
+[2026-02-08 15:59:54.761] WORK: Removing layout 'Vitis vinifera_PROD_AV' from layout manager
+[2026-02-08 15:59:54.762] WORK: Layout removed
+[2026-02-08 15:59:54.763] WORK: Removing all map layers
+[2026-02-08 15:59:54.767] WORK: All layers removed
+[2026-02-08 15:59:54.768] WORK: Clearing layer tree
+[2026-02-08 15:59:54.768] WORK: Layer tree cleared
+[2026-02-08 15:59:54.768] WORK: Running garbage collection (first pass)
+[2026-02-08 15:59:54.819] WORK: Garbage collection complete
+[2026-02-08 15:59:54.820] WORK: Processing Qt events (first pass)
+[2026-02-08 15:59:54.835] WORK: Second cleanup pass...
+[2026-02-08 15:59:54.894] WORK: Cleanup verification - remaining layers: 0
+[2026-02-08 15:59:54.894] WORK: Cleanup complete
+[2026-02-08 15:59:54.895] WORK: Exiting perform_the_work function
+[2026-02-08 15:59:54.895] LOOP: Iteration 4 completed
+

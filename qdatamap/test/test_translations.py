@@ -7,7 +7,6 @@
      (at your option) any later version.
 
 """
-from .utilities import get_qgis_app
 
 __author__ = 'ismailsunni@yahoo.co.id'
 __date__ = '12/10/2011'
@@ -16,11 +15,20 @@ __copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
 import unittest
 import os
 
-from qgis.PyQt.QtCore import QCoreApplication, QTranslator
+from .qgis_stubs import ensure_qgis_app, qgis_available
 
-QGIS_APP = get_qgis_app()
+QGIS_AVAILABLE = qgis_available()
+
+if QGIS_AVAILABLE:
+    ensure_qgis_app()
+
+TRANSLATION_FILE = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), os.pardir, 'i18n', 'af.qm'))
 
 
+@unittest.skipUnless(QGIS_AVAILABLE, 'QGIS environment required')
+@unittest.skipUnless(os.path.exists(TRANSLATION_FILE),
+                     'compiled translation i18n/af.qm not present')
 class SafeTranslationsTest(unittest.TestCase):
     """Test translations work."""
 
@@ -36,12 +44,10 @@ class SafeTranslationsTest(unittest.TestCase):
 
     def test_qgis_translations(self):
         """Test that translations work."""
-        parent_path = os.path.join(__file__, os.path.pardir, os.path.pardir)
-        dir_path = os.path.abspath(parent_path)
-        file_path = os.path.join(
-            dir_path, 'i18n', 'af.qm')
+        from qgis.PyQt.QtCore import QCoreApplication, QTranslator
+
         translator = QTranslator()
-        translator.load(file_path)
+        translator.load(TRANSLATION_FILE)
         QCoreApplication.installTranslator(translator)
 
         expected_message = 'Goeie more'
@@ -50,6 +56,4 @@ class SafeTranslationsTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(SafeTranslationsTest)
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+    unittest.main()
