@@ -5,18 +5,18 @@ This plugin iteratively prints geospatially explicit tabular datasets with which
 
 ## Installation
 
-**Requirements:** QGIS 3.44
+**Requirements:** QGIS 3.40
 
 1. Download the latest `.zip` from the [Releases](https://github.com/claudioribotta/QDataMap/releases) page.
 2. In QGIS, go to **Plugins → Manage and Install Plugins → Install from ZIP**.
 3. Select the downloaded `.zip` and click **Install Plugin**.
 4. Enable *QDataMap* in the plugin list.
 
-On first run, the plugin will detect and offer to automatically install any missing Python dependencies (`pandas`, `chardet`, `matplotlib`, `seaborn`). 
+On first run, the plugin will detect and offer to automatically install any missing Python dependencies (`pandas`, `chardet`, `matplotlib`, `seaborn`, 'psutil'). 
 
 If auto-install fails, open the QGIS Python console and run:
 
 ```
 import subprocess, sys, os
-subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', 'pandas', 'chardet', 'matplotlib', 'seaborn'])
+subprocess.check_call([os.path.join(sys.exec_prefix, 'python.exe'), '-m', 'pip', 'install', 'pandas', 'chardet', 'matplotlib', 'seaborn','psutil'])
 ```
